@@ -1,0 +1,19 @@
+NAME                                  TYPE              FROM         LATEST
+buildconfigs/mlbparks-pipeline        JenkinsPipeline   Git@master   0
+buildconfigs/nationalparks-pipeline   JenkinsPipeline   Git@master   2
+buildconfigs/parksmap-pipeline        JenkinsPipeline   Git@master   0
+NAME                              TYPE              FROM         STATUS     STARTED        DURATION
+builds/nationalparks-pipeline-2   JenkinsPipeline   Git@master   Complete   17 hours ago   
+NAME                                      DOCKER REPO                                                                    TAGS      UPDATED
+imagestreams/jenkins-slave-maven-appdev   docker-registry.default.svc:5000/lpierson-jenkins/jenkins-slave-maven-appdev   v3.7      8 days ago
+NAME                        REVISION   DESIRED   CURRENT   TRIGGERED BY
+deploymentconfigs/jenkins   1          1         1         config,image(jenkins:latest)
+NAME             HOST/PORT                                                  PATH      SERVICES   PORT      TERMINATION     WILDCARD
+routes/jenkins   jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com             jenkins    <all>     edge/Redirect   None
+NAME                 READY     STATUS    RESTARTS   AGE
+po/jenkins-1-kmphm   1/1       Running   0          7d
+NAME           DESIRED   CURRENT   READY     AGE
+rc/jenkins-1   1         1         1         8d
+NAME               CLUSTER-IP     EXTERNAL-IP   PORT(S)     AGE
+svc/jenkins        172.30.3.197   <none>        80/TCP      8d
+svc/jenkins-jnlp   172.30.60.56   <none>        50000/TCP   8d

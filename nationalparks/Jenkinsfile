@@ -1,0 +1,267 @@
+#!groovy
+
+// this pipeline runs on the custom Maven Slave ('maven-appdev')
+// Maven Slaves have JDK and Maven already installed
+// 'maven-appdev' has skopeo installed as well.
+
+node('maven-appdev') {
+  // Define Maven Command. 
+  def mvnCmd = "mvn -s nexus_settings_openshift.xml"
+
+  // Checkout Source Code
+    stage('Checkout Source') {
+       echo "LUC ===> Checkout Source "
+       git credentialsId: 'c7708a47f75058b2af1a526babab66d071aca221', url: 'https://github.com/lucpierson/ParksMap.git'
+  }
+
+  // The following variables need to be defined at the top level
+  // and not inside the scope of a stage - otherwise they would not
+  // be accessible from other stages.
+  // Extract version and other properties from the pom.xml
+  def groupId    = getGroupIdFromPom("nationalparks/pom.xml")
+  def artifactId = getArtifactIdFromPom("nationalparks/pom.xml")
+  def version    = getVersionFromPom("nationalparks/pom.xml")
+
+  // Set the tag for the development image: version + build number
+  def devTag  = "${version}-${BUILD_NUMBER}"
+  // Set the tag for the production image: version
+  def prodTag = "${version}"
+
+  // Using Maven build the war file
+  // Do not run tests in this step
+  stage('Build war') {
+    echo "Building version ${devTag}"
+
+    dir('nationalparks') {                           
+      // dir:"nationalparks"
+      echo "Current directory is :"
+      sh "pwd"
+      sh "${mvnCmd} clean package -DskipTests"
+    }
+  }
+
+  // Using Maven run the unit tests
+  stage('Unit Tests') {
+    echo "Running Unit Tests"
+
+      dir('nationalparks') {
+      // dir:"nationalparks"
+      echo "Current directory is :"
+      sh "pwd"
+      // sh "${mvnCmd} test"
+      }
+  }
+
+  // Using Maven call SonarQube for Code Analysis
+  stage('Code Analysis') {
+    echo "Running Code Analysis    -- skipping"
+
+      dir('nationalparks') {
+      // dir:"nationalparks"
+      echo "Current directory is :"
+      sh "pwd"
+      // sh "${mvnCmd} sonar:sonar -Dsonar.host.url=http://sonarqube-lpierson-sonarqube.apps.na37.openshift.opentlc.com/ -Dsonar.projectName=${JOB_BASE_NAME}-${devTag}"
+      }
+  }
+
+  // Publish the built war file to Nexus
+  stage('Publish to Nexus') {
+    echo "======================> STAGE Publish to Nexus"
+
+      dir('nationalparks') {
+      // dir:"nationalparks"
+      echo "Current directory is :"
+      sh "pwd"
+      sh "${mvnCmd} versions:set -DnewVersion=${devTag}"
+      sh "${mvnCmd} deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://nexus3-lpierson-nexus.apps.na37.openshift.opentlc.com/repository/releases/"
+      }
+  }
+
+  // Build the OpenShift Image in OpenShift and tag it.
+  stage('Build and Tag OpenShift Image') {
+    echo "STAGE Building OpenShift container image nationalparks:${devTag}"
+
+      dir('nationalparks') {
+      // dir:"nationalparks"
+      echo "Current directory is :"
+      sh "pwd"
+      // Start Binary Build in OpenShift using the file we just published
+      // The filename is nationalparks.jar in the 'target' directory of the current
+      // Jenkins workspace
+      sh "oc start-build nationalparks --follow --from-file=./target/nationalparks.jar -n lpierson-parkmap-dev"
+      // Tag the image using the devTag   
+      openshiftTag alias: 'false', destStream: 'nationalparks', destTag: devTag, destinationNamespace: 'lpierson-parkmap-dev', namespace: 'lpierson-parkmap-dev', srcStream: 'nationalparks', srcTag: 'latest', verbose: 'false'
+      } 
+  }
+
+  // Deploy the built image to the Development Environment.
+  stage('Deploy to Dev') {
+    echo "Deploying container image to Development Project"
+    echo "STAGE Deploying container image to Development Project"
+
+     dir('nationalparks') {
+      // dir:"nationalparks"
+      echo "Current directory is :"
+      sh "pwd"
+
+
+     // Update the Image on the Development Deployment Config
+     sh "oc set image dc/nationalparks nationalparks=docker-registry.default.svc:5000/lpierson-parkmap-dev/nationalparks:${devTag} -n lpierson-parkmap-dev"
+
+     // Update the Config Map which contains the users for the nationalparks application
+     //sh "oc delete configmap nationalparks-config -n lpierson-parkmap-dev"
+     //sh "oc create configmap nationalparks-config --from-file=./configuration/application-users.properties --from-file=./configuration/application-roles.properties -n lpierson-parkmap-dev"
+
+     // Deploy the development application.
+
+     openshiftDeploy depCfg: 'nationalparks', namespace: 'lpierson-parkmap-dev', verbose: 'false', waitTime: '', waitUnit: 'sec'
+     openshiftVerifyDeployment depCfg: 'nationalparks', namespace: 'lpierson-parkmap-dev', replicaCount: '1', verbose: 'false', verifyReplicaCount: 'false', waitTime: '', waitUnit: 'sec'
+     openshiftVerifyService namespace: 'lpierson-parkmap-dev', svcName: 'nationalparks', verbose: 'false'
+
+    // LUC ADDED - The exposed route to the application needs a label type=parksmap-backend for the frontend to dynamically discover the service.
+     sh 'oc patch route nationalparks -n lpierson-parkmap-dev -p \'{"metadata":{"labels":{"type": "parksmap-backend"}}}\''
+  }
+
+  }
+
+  // Run Integration Tests in the Development Environment.
+  stage('Integration Tests') {
+    echo "Running Integration Tests"
+     echo "1.10   ===> Running Integration Tests"
+    sleep 15
+    sleep 15
+    sleep 15
+    // Create a new task called "integration_test_1"
+    echo "Creating parks"
+    lucCommand = 
+
+    sh "curl -i -X POST -u 'nationalparks:redhat1' -H 'Content-Length: 0' http://nationalparks-lpierson-parkmap-dev.apps.na37.openshift.opentlc.com/ws/backends/"
+
+
+    // Retrieve parks 
+    echo "Retrieving parks"
+    sh "curl -i -X DELETE -u 'nationalparks:redhat1' -H 'Content-Length: 0' http://nationalparks-lpierson-parkmap-dev.apps.na37.openshift.opentlc.com/ws/backends/"
+
+
+    // Delete task with id "1"
+    echo "Deleting parks"
+    sh "curl -i -X GET-u 'nationalparks:redhat1' -H 'Content-Length: 0' http://nationalparks-lpierson-parkmap-dev.apps.na37.openshift.opentlc.com/ws/backends/"
+
+
+  }
+
+  // Copy Image to Nexus Docker Registry
+  stage('Copy Image to Nexus Docker Registry') {
+    echo "3.11   ==> Copy image to Nexus Docker Registry"
+    //sh "skopeo copy --src-tls-verify=false --dest-tls-verify=false --src-creds openshift:\$(oc whoami -t) --dest-creds admin:admin123 docker://nexus-registry-lpierson-nexus.apps.na37.openshift.opentlc.com:5000/lpierson-parkmap-dev/nationalparks:${devTag} docker://nexus-registry-lpierson-nexus.apps.na37.openshift.opentlc.com:5000/nationalparks:${devTag}"
+    sh "skopeo copy --src-tls-verify=false --dest-tls-verify=false --src-creds openshift:\$(oc whoami -t) --dest-creds admin:admin123 docker://docker-registry.default.svc.cluster.local:5000/lpierson-parkmap-dev/nationalparks:${devTag} docker://nexus-registry-lpierson-nexus.apps.na37.openshift.opentlc.com/nationalparks:${devTag}"
+
+
+    // Tag the built image with the production tag.
+       // changing the prod tag as Applicaiton is production ready
+       prodTag = devTag
+       echo "the prod tag to use for the image in production:" + prodTag
+
+    openshiftTag alias: 'false', destStream: 'nationalparks', destTag: prodTag, destinationNamespace: 'lpierson-parkmap-prod', namespace: 'lpierson-parkmap-dev', srcStream: 'nationalparks', srcTag: devTag, verbose: 'false'
+
+
+
+  }
+
+  // Blue/Green Deployment into Production
+  // -------------------------------------
+  // Do not activate the new version yet.
+
+  def destApp   = "nationalparks-green"
+  def activeApp = ""
+
+  stage('Blue/Green Production Deployment') {
+
+    echo "3.12   ==> Blue/Green Deployment into Production"
+
+    sh "oc get route nationalparks -n lpierson-parkmap-prod -o jsonpath='{ .spec.to.name }' > activesvc.txt"
+    activeApp = readFile('activesvc.txt').trim()
+    if (activeApp == "nationalparks-green") {
+       destApp = "nationalparks-blue"
+    }
+    echo "===== LUC =============> Active Application:      " + activeApp
+    echo "===== LUC =============> Destination Application: " + destApp
+
+
+     dir('nationalparks') {
+      // dir:"nationalparks"
+      echo "Current directory is :"
+      sh "pwd"
+
+       echo "the prod tag to use for the image in production:" + prodTag
+
+       // Update the Image on the Production Deployment Config
+       sh "oc set image dc/${destApp} ${destApp}=docker-registry.default.svc:5000/lpierson-parkmap-dev/nationalparks:${prodTag} -n lpierson-parkmap-prod"
+
+       // Update the Config Map which contains the users for the nationalparks application
+       // sh "oc delete configmap ${destApp}-config -n lpierson-parkmap-prod --ignore-not-found=true"
+       // sh "oc create configmap ${destApp}-config --from-file=./configuration/application-users.properties --from-file=./configuration/application-roles.properties -n lpierson-parkmap-prod"
+
+       // Deploy the inactive application.
+
+       openshiftDeploy depCfg: destApp, namespace: 'lpierson-parkmap-prod', verbose: 'false', waitTime: '', waitUnit: 'sec'
+       openshiftVerifyDeployment depCfg: destApp, namespace: 'lpierson-parkmap-prod', replicaCount: '1', verbose: 'false', verifyReplicaCount: 'true', waitTime: '', waitUnit: 'sec'
+       openshiftVerifyService namespace: 'lpierson-parkmap-prod', svcName: destApp, verbose: 'false'
+      }
+  }
+
+  stage('Switch over to new Version') {
+ 
+    echo "3.13 Switching Production application to ${destApp}."
+
+   // patching the service for  parksmap-backend scan and ask to go live
+  
+
+   sh "oc get route nationalparks -n lpierson-parkmap-prod -o jsonpath='{ .spec.to.name }' > activesvc.txt"
+      activeApp = readFile('activesvc.txt').trim()
+
+    //    if (active_service.equals(app_name + "-green")) {
+    if (activeApp == "nationalparks-green") {
+       destApp = "nationalparks-blue"
+    } else {
+        destApp = "nationalparks-green" 
+    }
+
+      echo "the ACTUAL in Production service      :" + activeApp
+      echo "the DESTINATION in Production service :" + destApp
+
+
+     input message: "Approve ${destApp} to GO LIVE ?"
+
+        sh 'oc patch route nationalparks -n lpierson-parkmap-prod -p \'{"spec":{"to":{"name":"' + destApp + '"}}}\''
+
+        // LUC ADDED - The exposed service of the current the application needs a label type=parksmap-backend for the frontend to dynamically discover the service.
+
+        sh "oc label --overwrite service ${destApp} type=parksmap-backend -n lpierson-parkmap-prod"
+        sh "oc label --overwrite service ${activeApp} type=silent -n lpierson-parkmap-prod"
+ 
+
+
+  }
+
+
+
+
+}
+
+// Convenience Functions to read variables from the pom.xml
+// Do not change anything below this line.
+// --------------------------------------------------------
+def getVersionFromPom(pom) {
+  def matcher = readFile(pom) =~ '<version>(.+)</version>'
+  matcher ? matcher[0][1] : null
+}
+def getGroupIdFromPom(pom) {
+  def matcher = readFile(pom) =~ '<groupId>(.+)</groupId>'
+  matcher ? matcher[0][1] : null
+}
+def getArtifactIdFromPom(pom) {
+  def matcher = readFile(pom) =~ '<artifactId>(.+)</artifactId>'
+  matcher ? matcher[0][1] : null
+}
+

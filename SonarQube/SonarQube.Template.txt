@@ -1,0 +1,331 @@
+apiVersion: v1
+kind: Template
+metadata:
+  creationTimestamp: null
+  name: sonarqube
+objects:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+      openshift.io/image.dockerRepositoryCheck: 2018-03-19T08:16:32Z
+    creationTimestamp: null
+    generation: 2
+    labels:
+      app: sonarqube
+    name: sonarqube
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+    - annotations:
+        openshift.io/imported-from: wkulhanek/sonarqube:6.7.2
+      from:
+        kind: DockerImage
+        name: docker-registry.default.svc:5000/lpierson-sonarqube/sonarqube:6.7.2
+      generation: 2
+      importPolicy: {}
+      name: 6.7.2
+      referencePolicy:
+        type: Source
+  status:
+    dockerImageRepository: ""
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+      template.alpha.openshift.io/wait-for-ready: "true"
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: sonarqube_db
+      template: postgresql-persistent-template
+    name: postgresql
+  spec:
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      name: postgresql
+    strategy:
+      activeDeadlineSeconds: 21600
+      recreateParams:
+        timeoutSeconds: 600
+      resources: {}
+      type: Recreate
+    template:
+      metadata:
+        annotations:
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: sonarqube_db
+          name: postgresql
+      spec:
+        containers:
+        - env:
+          - name: POSTGRESQL_USER
+            valueFrom:
+              secretKeyRef:
+                key: database-user
+                name: postgresql
+          - name: POSTGRESQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: database-password
+                name: postgresql
+          - name: POSTGRESQL_DATABASE
+            valueFrom:
+              secretKeyRef:
+                key: database-name
+                name: postgresql
+          image: registry.access.redhat.com/rhscl/postgresql-95-rhel7@sha256:d8b932fab1c9eb48a8a2f2fd94caf6dcff18a78413f621c92d280b158754d7ed
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            tcpSocket:
+              port: 5432
+            timeoutSeconds: 1
+          name: postgresql
+          ports:
+          - containerPort: 5432
+            protocol: TCP
+          readinessProbe:
+            exec:
+              command:
+              - /bin/sh
+              - -i
+              - -c
+              - psql -h 127.0.0.1 -U $POSTGRESQL_USER -q -d $POSTGRESQL_DATABASE -c
+                'SELECT 1'
+            failureThreshold: 3
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              memory: 512Mi
+          securityContext:
+            capabilities: {}
+            privileged: false
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /var/lib/pgsql/data
+            name: postgresql-data
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - name: postgresql-data
+          persistentVolumeClaim:
+            claimName: postgresql
+    test: false
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - postgresql
+        from:
+          kind: ImageStreamTag
+          name: postgresql:9.5
+          namespace: openshift
+      type: ImageChange
+    - type: ConfigChange
+  status:
+    availableReplicas: 0
+    latestVersion: 0
+    observedGeneration: 0
+    replicas: 0
+    unavailableReplicas: 0
+    updatedReplicas: 0
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: sonarqube
+    name: sonarqube
+  spec:
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      app: sonarqube
+      deploymentconfig: sonarqube
+    strategy:
+      activeDeadlineSeconds: 21600
+      recreateParams:
+        timeoutSeconds: 600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Recreate
+    template:
+      metadata:
+        annotations:
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: sonarqube
+          deploymentconfig: sonarqube
+      spec:
+        containers:
+        - env:
+          - name: SONARQUBE_JDBC_PASSWORD
+            value: sonar
+          - name: SONARQUBE_JDBC_URL
+            value: jdbc:postgresql://postgresql/sonar
+          - name: SONARQUBE_JDBC_USERNAME
+            value: sonar
+          image: wkulhanek/sonarqube@sha256:418cdc60af365bfe15c97a419cf4e45ade36201afee425681f2a31b4689f73e3
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            exec:
+              command:
+              - echo
+              - ok
+            failureThreshold: 3
+            initialDelaySeconds: 40
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: sonarqube
+          ports:
+          - containerPort: 9000
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /about
+              port: 9000
+              scheme: HTTP
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: "2"
+              memory: 3Gi
+            requests:
+              cpu: "1"
+              memory: 2Gi
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /opt/sonarqube/data
+            name: sonarqube-volume-1
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - name: sonarqube-volume-1
+          persistentVolumeClaim:
+            claimName: sonarqube-pvc
+    test: false
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - sonarqube
+        from:
+          kind: ImageStreamTag
+          name: sonarqube:6.7.2
+          namespace: lpierson-sonarqube
+      type: ImageChange
+  status:
+    availableReplicas: 0
+    latestVersion: 0
+    observedGeneration: 0
+    replicas: 0
+    unavailableReplicas: 0
+    updatedReplicas: 0
+- apiVersion: v1
+  kind: Route
+  metadata:
+    annotations:
+      openshift.io/host.generated: "true"
+    creationTimestamp: null
+    labels:
+      app: sonarqube
+    name: sonarqube
+  spec:
+    host: sonarqube-lpierson-sonarqube.apps.na37.openshift.opentlc.com
+    port:
+      targetPort: 9000-tcp
+    to:
+      kind: Service
+      name: sonarqube
+      weight: 100
+    wildcardPolicy: None
+  status:
+    ingress:
+    - conditions:
+      - lastTransitionTime: 2018-03-19T08:25:53Z
+        status: "True"
+        type: Admitted
+      host: sonarqube-lpierson-sonarqube.apps.na37.openshift.opentlc.com
+      routerName: router
+      wildcardPolicy: None
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+      template.openshift.io/expose-uri: postgres://{.spec.clusterIP}:{.spec.ports[?(.name=="postgresql")].port}
+    creationTimestamp: null
+    labels:
+      app: sonarqube_db
+      template: postgresql-persistent-template
+    name: postgresql
+  spec:
+    ports:
+    - name: postgresql
+      port: 5432
+      protocol: TCP
+      targetPort: 5432
+    selector:
+      name: postgresql
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: sonarqube
+    name: sonarqube
+  spec:
+    ports:
+    - name: 9000-tcp
+      port: 9000
+      protocol: TCP
+      targetPort: 9000
+    selector:
+      app: sonarqube
+      deploymentconfig: sonarqube
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}

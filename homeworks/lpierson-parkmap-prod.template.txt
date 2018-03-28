@@ -1,0 +1,3356 @@
+apiVersion: v1
+kind: Template
+metadata:
+  creationTimestamp: null
+  name: parkmap-prod
+objects:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    creationTimestamp: null
+    generation: 4
+    name: mlbparks
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+    - annotations: null
+      from:
+        kind: DockerImage
+        name: docker-registry.default.svc:5000/lpierson-parkmap-prod/mlbparks:1.0-40
+      generation: 2
+      importPolicy: {}
+      name: 1.0-40
+      referencePolicy:
+        type: Source
+    - annotations: null
+      from:
+        kind: DockerImage
+        name: docker-registry.default.svc:5000/lpierson-parkmap-prod/mlbparks:1.0-41
+      generation: 3
+      importPolicy: {}
+      name: 1.0-41
+      referencePolicy:
+        type: Source
+    - annotations: null
+      from:
+        kind: DockerImage
+        name: docker-registry.default.svc:5000/lpierson-parkmap-prod/mlbparks:1.0-42
+      generation: 4
+      importPolicy: {}
+      name: 1.0-42
+      referencePolicy:
+        type: Source
+  status:
+    dockerImageRepository: ""
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+      openshift.io/image.dockerRepositoryCheck: 2018-03-24T12:31:30Z
+    creationTimestamp: null
+    generation: 2
+    labels:
+      app: mongodb-32-rhel7
+    name: mongodb-32-rhel7
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+    - annotations:
+        openshift.io/imported-from: registry.access.redhat.com/rhscl/mongodb-32-rhel7:3.2
+      from:
+        kind: DockerImage
+        name: docker-registry.default.svc:5000/lpierson-parkmap-prod/mongodb-32-rhel7:3.2
+      generation: 2
+      importPolicy: {}
+      name: "3.2"
+      referencePolicy:
+        type: Source
+  status:
+    dockerImageRepository: ""
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    creationTimestamp: null
+    generation: 5
+    name: nationalparks
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+    - annotations: null
+      from:
+        kind: DockerImage
+        name: docker-registry.default.svc:5000/lpierson-parkmap-prod/nationalparks:1.4.0.RELEASE
+      generation: 2
+      importPolicy: {}
+      name: 1.4.0.RELEASE
+      referencePolicy:
+        type: Source
+    - annotations: null
+      from:
+        kind: DockerImage
+        name: docker-registry.default.svc:5000/lpierson-parkmap-prod/nationalparks:1.4.0.RELEASE-12
+      generation: 3
+      importPolicy: {}
+      name: 1.4.0.RELEASE-12
+      referencePolicy:
+        type: Source
+    - annotations: null
+      from:
+        kind: DockerImage
+        name: docker-registry.default.svc:5000/lpierson-parkmap-prod/nationalparks:1.4.0.RELEASE-13
+      generation: 4
+      importPolicy: {}
+      name: 1.4.0.RELEASE-13
+      referencePolicy:
+        type: Source
+    - annotations: null
+      from:
+        kind: DockerImage
+        name: docker-registry.default.svc:5000/lpierson-parkmap-prod/nationalparks:1.4.0.RELEASE-2
+      generation: 5
+      importPolicy: {}
+      name: 1.4.0.RELEASE-2
+      referencePolicy:
+        type: Source
+  status:
+    dockerImageRepository: ""
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    creationTimestamp: null
+    generation: 3
+    name: parksmap
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+    - annotations: null
+      from:
+        kind: DockerImage
+        name: docker-registry.default.svc:5000/lpierson-parkmap-prod/parksmap:1.4.0.RELEASE-5
+      generation: 2
+      importPolicy: {}
+      name: 1.4.0.RELEASE-5
+      referencePolicy:
+        type: Source
+    - annotations: null
+      from:
+        kind: DockerImage
+        name: docker-registry.default.svc:5000/lpierson-parkmap-prod/parksmap:1.4.0.RELEASE-6
+      generation: 3
+      importPolicy: {}
+      name: 1.4.0.RELEASE-6
+      referencePolicy:
+        type: Source
+  status:
+    dockerImageRepository: ""
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: mlbparks-blue
+    name: mlbparks-blue
+  spec:
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      app: mlbparks-blue
+      deploymentconfig: mlbparks-blue
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        annotations:
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: mlbparks-blue
+          deploymentconfig: mlbparks-blue
+      spec:
+        containers:
+        - env:
+          - name: DB_HOST
+            value: mongodb
+          - name: DB_PORT
+            value: "27017"
+          - name: DB_USERNAME
+            value: mongodb
+          - name: DB_PASSWORD
+            value: mongodb
+          - name: DB_NAME
+            value: parks
+          - name: DB_REPLICASET
+            value: rs0
+          image: docker-registry.default.svc:5000/lpierson-parkmap-dev/mlbparks:1.0-42
+          imagePullPolicy: IfNotPresent
+          name: mlbparks-blue
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /opt/eap/standalone/configuration/application-users.properties
+            name: jboss-config
+            subPath: application-users.properties
+          - mountPath: /opt/eap/standalone/configuration/application-roles.properties
+            name: jboss-config1
+            subPath: application-roles.properties
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - configMap:
+            defaultMode: 420
+            name: mlbparks-blue-config
+          name: jboss-config
+        - configMap:
+            defaultMode: 420
+            name: mlbparks-blue-config
+          name: jboss-config1
+    test: false
+    triggers: []
+  status:
+    availableReplicas: 0
+    latestVersion: 0
+    observedGeneration: 0
+    replicas: 0
+    unavailableReplicas: 0
+    updatedReplicas: 0
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: mlbparks-green
+    name: mlbparks-green
+  spec:
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      app: mlbparks-green
+      deploymentconfig: mlbparks-green
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        annotations:
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: mlbparks-green
+          deploymentconfig: mlbparks-green
+      spec:
+        containers:
+        - env:
+          - name: DB_HOST
+            value: mongodb
+          - name: DB_PORT
+            value: "27017"
+          - name: DB_USERNAME
+            value: mongodb
+          - name: DB_PASSWORD
+            value: mongodb
+          - name: DB_NAME
+            value: parks
+          - name: DB_REPLICASET
+            value: rs0
+          image: docker-registry.default.svc:5000/lpierson-parkmap-dev/mlbparks:1.0-41
+          imagePullPolicy: IfNotPresent
+          name: mlbparks-green
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /opt/eap/standalone/configuration/application-users.properties
+            name: jboss-config
+            subPath: application-users.properties
+          - mountPath: /opt/eap/standalone/configuration/application-roles.properties
+            name: jboss-config1
+            subPath: application-roles.properties
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - configMap:
+            defaultMode: 420
+            name: mlbparks-green-config
+          name: jboss-config
+        - configMap:
+            defaultMode: 420
+            name: mlbparks-green-config
+          name: jboss-config1
+    test: false
+    triggers: []
+  status:
+    availableReplicas: 0
+    latestVersion: 0
+    observedGeneration: 0
+    replicas: 0
+    unavailableReplicas: 0
+    updatedReplicas: 0
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: nationalparks-blue
+    name: nationalparks-blue
+  spec:
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      app: nationalparks-blue
+      deploymentconfig: nationalparks-blue
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        annotations:
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: nationalparks-blue
+          deploymentconfig: nationalparks-blue
+      spec:
+        containers:
+        - env:
+          - name: DB_HOST
+            value: mongodb
+          - name: DB_PORT
+            value: "27017"
+          - name: DB_USERNAME
+            value: mongodb
+          - name: DB_PASSWORD
+            value: mongodb
+          - name: DB_NAME
+            value: parks
+          - name: DB_REPLICASET
+            value: rs0
+          image: docker-registry.default.svc:5000/lpierson-parkmap-dev/nationalparks:1.4.0.RELEASE-13
+          imagePullPolicy: IfNotPresent
+          name: nationalparks-blue
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /opt/eap/standalone/configuration/application-users.properties
+            name: jboss-config
+            subPath: application-users.properties
+          - mountPath: /opt/eap/standalone/configuration/application-roles.properties
+            name: jboss-config1
+            subPath: application-roles.properties
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - configMap:
+            defaultMode: 420
+            name: nationalparks-blue-config
+          name: jboss-config
+        - configMap:
+            defaultMode: 420
+            name: nationalparks-blue-config
+          name: jboss-config1
+    test: false
+    triggers: []
+  status:
+    availableReplicas: 0
+    latestVersion: 0
+    observedGeneration: 0
+    replicas: 0
+    unavailableReplicas: 0
+    updatedReplicas: 0
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: nationalparks-green
+    name: nationalparks-green
+  spec:
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      app: nationalparks-green
+      deploymentconfig: nationalparks-green
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        annotations:
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: nationalparks-green
+          deploymentconfig: nationalparks-green
+      spec:
+        containers:
+        - env:
+          - name: DB_HOST
+            value: mongodb
+          - name: DB_PORT
+            value: "27017"
+          - name: DB_USERNAME
+            value: mongodb
+          - name: DB_PASSWORD
+            value: mongodb
+          - name: DB_NAME
+            value: parks
+          - name: DB_REPLICASET
+            value: rs0
+          image: docker-registry.default.svc:5000/lpierson-parkmap-dev/nationalparks:1.4.0.RELEASE-2
+          imagePullPolicy: IfNotPresent
+          name: nationalparks-green
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /opt/eap/standalone/configuration/application-users.properties
+            name: jboss-config
+            subPath: application-users.properties
+          - mountPath: /opt/eap/standalone/configuration/application-roles.properties
+            name: jboss-config1
+            subPath: application-roles.properties
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - configMap:
+            defaultMode: 420
+            name: nationalparks-green-config
+          name: jboss-config
+        - configMap:
+            defaultMode: 420
+            name: nationalparks-green-config
+          name: jboss-config1
+    test: false
+    triggers: []
+  status:
+    availableReplicas: 0
+    latestVersion: 0
+    observedGeneration: 0
+    replicas: 0
+    unavailableReplicas: 0
+    updatedReplicas: 0
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: parksmap-blue
+    name: parksmap-blue
+  spec:
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      app: parksmap-blue
+      deploymentconfig: parksmap-blue
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        annotations:
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: parksmap-blue
+          deploymentconfig: parksmap-blue
+      spec:
+        containers:
+        - image: docker-registry.default.svc:5000/lpierson-parkmap-dev/parksmap:1.4.0.RELEASE-5
+          imagePullPolicy: IfNotPresent
+          name: parksmap-blue
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    test: false
+    triggers: []
+  status:
+    availableReplicas: 0
+    latestVersion: 0
+    observedGeneration: 0
+    replicas: 0
+    unavailableReplicas: 0
+    updatedReplicas: 0
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: parksmap-green
+    name: parksmap-green
+  spec:
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      app: parksmap-green
+      deploymentconfig: parksmap-green
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        annotations:
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: parksmap-green
+          deploymentconfig: parksmap-green
+      spec:
+        containers:
+        - image: docker-registry.default.svc:5000/lpierson-parkmap-dev/parksmap:1.4.0.RELEASE-6
+          imagePullPolicy: IfNotPresent
+          name: parksmap-green
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    test: false
+    triggers: []
+  status:
+    availableReplicas: 0
+    latestVersion: 0
+    observedGeneration: 0
+    replicas: 0
+    unavailableReplicas: 0
+    updatedReplicas: 0
+- apiVersion: v1
+  kind: Route
+  metadata:
+    annotations:
+      openshift.io/host.generated: "true"
+    creationTimestamp: null
+    labels:
+      app: mlbparks-blue
+      type: parksmap-backend
+    name: mlbparks
+  spec:
+    host: mlbparks-lpierson-parkmap-prod.apps.na37.openshift.opentlc.com
+    port:
+      targetPort: 8080
+    to:
+      kind: Service
+      name: mlbparks-blue
+      weight: 100
+    wildcardPolicy: None
+  status:
+    ingress:
+    - conditions:
+      - lastTransitionTime: 2018-03-24T12:23:36Z
+        status: "True"
+        type: Admitted
+      host: mlbparks-lpierson-parkmap-prod.apps.na37.openshift.opentlc.com
+      routerName: router
+      wildcardPolicy: None
+- apiVersion: v1
+  kind: Route
+  metadata:
+    annotations:
+      openshift.io/host.generated: "true"
+    creationTimestamp: null
+    labels:
+      app: nationalparks-blue
+      type: parksmap-backend
+    name: nationalparks
+  spec:
+    host: nationalparks-lpierson-parkmap-prod.apps.na37.openshift.opentlc.com
+    port:
+      targetPort: 8080
+    to:
+      kind: Service
+      name: nationalparks-green
+      weight: 100
+    wildcardPolicy: None
+  status:
+    ingress:
+    - conditions:
+      - lastTransitionTime: 2018-03-24T12:23:46Z
+        status: "True"
+        type: Admitted
+      host: nationalparks-lpierson-parkmap-prod.apps.na37.openshift.opentlc.com
+      routerName: router
+      wildcardPolicy: None
+- apiVersion: v1
+  kind: Route
+  metadata:
+    annotations:
+      openshift.io/host.generated: "true"
+    creationTimestamp: null
+    labels:
+      app: parksmap-blue
+    name: parksmap
+  spec:
+    host: parksmap-lpierson-parkmap-prod.apps.na37.openshift.opentlc.com
+    port:
+      targetPort: 8080
+    to:
+      kind: Service
+      name: parksmap-green
+      weight: 100
+    wildcardPolicy: None
+  status:
+    ingress:
+    - conditions:
+      - lastTransitionTime: 2018-03-24T12:23:55Z
+        status: "True"
+        type: Admitted
+      host: parksmap-lpierson-parkmap-prod.apps.na37.openshift.opentlc.com
+      routerName: router
+      wildcardPolicy: None
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    annotations:
+      kubernetes.io/created-by: |
+        {"kind":"SerializedReference","apiVersion":"v1","reference":{"kind":"ReplicationController","namespace":"lpierson-parkmap-prod","name":"mlbparks-blue-2","uid":"98c130e7-311a-11e8-8c2f-0237abc1361e","apiVersion":"v1","resourceVersion":"23000699"}}
+      kubernetes.io/limit-ranger: 'LimitRanger plugin set: cpu, memory request for
+        container mlbparks-blue; cpu, memory limit for container mlbparks-blue'
+      openshift.io/deployment-config.latest-version: "2"
+      openshift.io/deployment-config.name: mlbparks-blue
+      openshift.io/deployment.name: mlbparks-blue-2
+      openshift.io/generated-by: OpenShiftNewApp
+      openshift.io/scc: restricted
+    creationTimestamp: null
+    generateName: mlbparks-blue-2-
+    labels:
+      app: mlbparks-blue
+      deployment: mlbparks-blue-2
+      deploymentconfig: mlbparks-blue
+    ownerReferences:
+    - apiVersion: v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ReplicationController
+      name: mlbparks-blue-2
+      uid: 98c130e7-311a-11e8-8c2f-0237abc1361e
+  spec:
+    containers:
+    - env:
+      - name: DB_HOST
+        value: mongodb
+      - name: DB_PORT
+        value: "27017"
+      - name: DB_USERNAME
+        value: mongodb
+      - name: DB_PASSWORD
+        value: mongodb
+      - name: DB_NAME
+        value: parks
+      - name: DB_REPLICASET
+        value: rs0
+      image: docker-registry.default.svc:5000/lpierson-parkmap-dev/mlbparks:1.0-42
+      imagePullPolicy: IfNotPresent
+      name: mlbparks-blue
+      resources:
+        limits:
+          cpu: 500m
+          memory: 1536Mi
+        requests:
+          cpu: 50m
+          memory: 256Mi
+      securityContext:
+        capabilities:
+          drop:
+          - KILL
+          - MKNOD
+          - SETGID
+          - SETUID
+        privileged: false
+        runAsUser: 1003580000
+        seLinuxOptions:
+          level: s0:c60,c20
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /opt/eap/standalone/configuration/application-users.properties
+        name: jboss-config
+        subPath: application-users.properties
+      - mountPath: /opt/eap/standalone/configuration/application-roles.properties
+        name: jboss-config1
+        subPath: application-roles.properties
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: default-token-v2nbr
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    imagePullSecrets:
+    - name: default-dockercfg-2qwvz
+    nodeName: node1.na37.internal
+    nodeSelector:
+      env: users
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    securityContext:
+      fsGroup: 1003580000
+      seLinuxOptions:
+        level: s0:c60,c20
+    serviceAccount: default
+    serviceAccountName: default
+    terminationGracePeriodSeconds: 30
+    volumes:
+    - configMap:
+        defaultMode: 420
+        name: mlbparks-blue-config
+      name: jboss-config
+    - configMap:
+        defaultMode: 420
+        name: mlbparks-blue-config
+      name: jboss-config1
+    - name: default-token-v2nbr
+      secret:
+        defaultMode: 420
+        secretName: default-token-v2nbr
+  status:
+    phase: Pending
+    qosClass: Burstable
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    annotations:
+      kubernetes.io/created-by: |
+        {"kind":"SerializedReference","apiVersion":"v1","reference":{"kind":"ReplicationController","namespace":"lpierson-parkmap-prod","name":"mlbparks-green-3","uid":"26e780df-3118-11e8-8c2f-0237abc1361e","apiVersion":"v1","resourceVersion":"22987036"}}
+      kubernetes.io/limit-ranger: 'LimitRanger plugin set: cpu, memory request for
+        container mlbparks-green; cpu, memory limit for container mlbparks-green'
+      openshift.io/deployment-config.latest-version: "3"
+      openshift.io/deployment-config.name: mlbparks-green
+      openshift.io/deployment.name: mlbparks-green-3
+      openshift.io/generated-by: OpenShiftNewApp
+      openshift.io/scc: restricted
+    creationTimestamp: null
+    generateName: mlbparks-green-3-
+    labels:
+      app: mlbparks-green
+      deployment: mlbparks-green-3
+      deploymentconfig: mlbparks-green
+    ownerReferences:
+    - apiVersion: v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ReplicationController
+      name: mlbparks-green-3
+      uid: 26e780df-3118-11e8-8c2f-0237abc1361e
+  spec:
+    containers:
+    - env:
+      - name: DB_HOST
+        value: mongodb
+      - name: DB_PORT
+        value: "27017"
+      - name: DB_USERNAME
+        value: mongodb
+      - name: DB_PASSWORD
+        value: mongodb
+      - name: DB_NAME
+        value: parks
+      - name: DB_REPLICASET
+        value: rs0
+      image: docker-registry.default.svc:5000/lpierson-parkmap-dev/mlbparks:1.0-41
+      imagePullPolicy: IfNotPresent
+      name: mlbparks-green
+      resources:
+        limits:
+          cpu: 500m
+          memory: 1536Mi
+        requests:
+          cpu: 50m
+          memory: 256Mi
+      securityContext:
+        capabilities:
+          drop:
+          - KILL
+          - MKNOD
+          - SETGID
+          - SETUID
+        privileged: false
+        runAsUser: 1003580000
+        seLinuxOptions:
+          level: s0:c60,c20
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /opt/eap/standalone/configuration/application-users.properties
+        name: jboss-config
+        subPath: application-users.properties
+      - mountPath: /opt/eap/standalone/configuration/application-roles.properties
+        name: jboss-config1
+        subPath: application-roles.properties
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: default-token-v2nbr
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    imagePullSecrets:
+    - name: default-dockercfg-2qwvz
+    nodeName: node2.na37.internal
+    nodeSelector:
+      env: users
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    securityContext:
+      fsGroup: 1003580000
+      seLinuxOptions:
+        level: s0:c60,c20
+    serviceAccount: default
+    serviceAccountName: default
+    terminationGracePeriodSeconds: 30
+    volumes:
+    - configMap:
+        defaultMode: 420
+        name: mlbparks-green-config
+      name: jboss-config
+    - configMap:
+        defaultMode: 420
+        name: mlbparks-green-config
+      name: jboss-config1
+    - name: default-token-v2nbr
+      secret:
+        defaultMode: 420
+        secretName: default-token-v2nbr
+  status:
+    phase: Pending
+    qosClass: Burstable
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    annotations:
+      kubernetes.io/created-by: |
+        {"kind":"SerializedReference","apiVersion":"v1","reference":{"kind":"StatefulSet","namespace":"lpierson-parkmap-prod","name":"mongodb","uid":"ee8355ca-2f5d-11e8-8c2f-0237abc1361e","apiVersion":"apps/v1beta1","resourceVersion":"20763096"}}
+      kubernetes.io/limit-ranger: 'LimitRanger plugin set: cpu, memory request for
+        container mongo-container; cpu, memory limit for container mongo-container'
+      openshift.io/scc: restricted
+    creationTimestamp: null
+    generateName: mongodb-
+    labels:
+      controller-revision-hash: mongodb-1972944915
+      name: mongodb
+    ownerReferences:
+    - apiVersion: apps/v1beta1
+      blockOwnerDeletion: true
+      controller: true
+      kind: StatefulSet
+      name: mongodb
+      uid: ee8355ca-2f5d-11e8-8c2f-0237abc1361e
+  spec:
+    containers:
+    - args:
+      - run-mongod-replication
+      env:
+      - name: MONGODB_DATABASE
+        value: parks
+      - name: MONGODB_USER
+        value: mongodb
+      - name: MONGODB_PASSWORD
+        value: mongodb
+      - name: MONGODB_ADMIN_PASSWORD
+        value: mongodb_admin_password
+      - name: MONGODB_REPLICA_NAME
+        value: rs0
+      - name: MONGODB_KEYFILE_VALUE
+        value: "12345678901234567890"
+      - name: MONGODB_SERVICE_NAME
+        value: mongodb
+      image: registry.access.redhat.com/rhscl/mongodb-32-rhel7:3.2
+      imagePullPolicy: IfNotPresent
+      name: mongo-container
+      ports:
+      - containerPort: 27017
+        protocol: TCP
+      readinessProbe:
+        exec:
+          command:
+          - stat
+          - /tmp/initialized
+        failureThreshold: 3
+        periodSeconds: 10
+        successThreshold: 1
+        timeoutSeconds: 1
+      resources:
+        limits:
+          cpu: 500m
+          memory: 1536Mi
+        requests:
+          cpu: 50m
+          memory: 256Mi
+      securityContext:
+        capabilities:
+          drop:
+          - KILL
+          - MKNOD
+          - SETGID
+          - SETUID
+        privileged: false
+        runAsUser: 1003580000
+        seLinuxOptions:
+          level: s0:c60,c20
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /var/lib/mongodb/data
+        name: mongo-data
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: default-token-v2nbr
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    hostname: mongodb-0
+    imagePullSecrets:
+    - name: default-dockercfg-2qwvz
+    nodeName: node2.na37.internal
+    nodeSelector:
+      env: users
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    securityContext:
+      fsGroup: 1003580000
+      seLinuxOptions:
+        level: s0:c60,c20
+    serviceAccount: default
+    serviceAccountName: default
+    subdomain: mongodb-internal
+    terminationGracePeriodSeconds: 30
+    volumes:
+    - name: mongo-data
+      persistentVolumeClaim:
+        claimName: mongo-data-mongodb-0
+    - name: default-token-v2nbr
+      secret:
+        defaultMode: 420
+        secretName: default-token-v2nbr
+  status:
+    phase: Pending
+    qosClass: Burstable
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    annotations:
+      kubernetes.io/created-by: |
+        {"kind":"SerializedReference","apiVersion":"v1","reference":{"kind":"StatefulSet","namespace":"lpierson-parkmap-prod","name":"mongodb","uid":"ee8355ca-2f5d-11e8-8c2f-0237abc1361e","apiVersion":"apps/v1beta1","resourceVersion":"20763106"}}
+      kubernetes.io/limit-ranger: 'LimitRanger plugin set: cpu, memory request for
+        container mongo-container; cpu, memory limit for container mongo-container'
+      openshift.io/scc: restricted
+    creationTimestamp: null
+    generateName: mongodb-
+    labels:
+      controller-revision-hash: mongodb-1972944915
+      name: mongodb
+    ownerReferences:
+    - apiVersion: apps/v1beta1
+      blockOwnerDeletion: true
+      controller: true
+      kind: StatefulSet
+      name: mongodb
+      uid: ee8355ca-2f5d-11e8-8c2f-0237abc1361e
+  spec:
+    containers:
+    - args:
+      - run-mongod-replication
+      env:
+      - name: MONGODB_DATABASE
+        value: parks
+      - name: MONGODB_USER
+        value: mongodb
+      - name: MONGODB_PASSWORD
+        value: mongodb
+      - name: MONGODB_ADMIN_PASSWORD
+        value: mongodb_admin_password
+      - name: MONGODB_REPLICA_NAME
+        value: rs0
+      - name: MONGODB_KEYFILE_VALUE
+        value: "12345678901234567890"
+      - name: MONGODB_SERVICE_NAME
+        value: mongodb
+      image: registry.access.redhat.com/rhscl/mongodb-32-rhel7:3.2
+      imagePullPolicy: IfNotPresent
+      name: mongo-container
+      ports:
+      - containerPort: 27017
+        protocol: TCP
+      readinessProbe:
+        exec:
+          command:
+          - stat
+          - /tmp/initialized
+        failureThreshold: 3
+        periodSeconds: 10
+        successThreshold: 1
+        timeoutSeconds: 1
+      resources:
+        limits:
+          cpu: 500m
+          memory: 1536Mi
+        requests:
+          cpu: 50m
+          memory: 256Mi
+      securityContext:
+        capabilities:
+          drop:
+          - KILL
+          - MKNOD
+          - SETGID
+          - SETUID
+        privileged: false
+        runAsUser: 1003580000
+        seLinuxOptions:
+          level: s0:c60,c20
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /var/lib/mongodb/data
+        name: mongo-data
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: default-token-v2nbr
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    hostname: mongodb-1
+    imagePullSecrets:
+    - name: default-dockercfg-2qwvz
+    nodeName: node1.na37.internal
+    nodeSelector:
+      env: users
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    securityContext:
+      fsGroup: 1003580000
+      seLinuxOptions:
+        level: s0:c60,c20
+    serviceAccount: default
+    serviceAccountName: default
+    subdomain: mongodb-internal
+    terminationGracePeriodSeconds: 30
+    volumes:
+    - name: mongo-data
+      persistentVolumeClaim:
+        claimName: mongo-data-mongodb-1
+    - name: default-token-v2nbr
+      secret:
+        defaultMode: 420
+        secretName: default-token-v2nbr
+  status:
+    phase: Pending
+    qosClass: Burstable
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    annotations:
+      kubernetes.io/created-by: |
+        {"kind":"SerializedReference","apiVersion":"v1","reference":{"kind":"StatefulSet","namespace":"lpierson-parkmap-prod","name":"mongodb","uid":"ee8355ca-2f5d-11e8-8c2f-0237abc1361e","apiVersion":"apps/v1beta1","resourceVersion":"20763228"}}
+      kubernetes.io/limit-ranger: 'LimitRanger plugin set: cpu, memory request for
+        container mongo-container; cpu, memory limit for container mongo-container'
+      openshift.io/scc: restricted
+    creationTimestamp: null
+    generateName: mongodb-
+    labels:
+      controller-revision-hash: mongodb-1972944915
+      name: mongodb
+    ownerReferences:
+    - apiVersion: apps/v1beta1
+      blockOwnerDeletion: true
+      controller: true
+      kind: StatefulSet
+      name: mongodb
+      uid: ee8355ca-2f5d-11e8-8c2f-0237abc1361e
+  spec:
+    containers:
+    - args:
+      - run-mongod-replication
+      env:
+      - name: MONGODB_DATABASE
+        value: parks
+      - name: MONGODB_USER
+        value: mongodb
+      - name: MONGODB_PASSWORD
+        value: mongodb
+      - name: MONGODB_ADMIN_PASSWORD
+        value: mongodb_admin_password
+      - name: MONGODB_REPLICA_NAME
+        value: rs0
+      - name: MONGODB_KEYFILE_VALUE
+        value: "12345678901234567890"
+      - name: MONGODB_SERVICE_NAME
+        value: mongodb
+      image: registry.access.redhat.com/rhscl/mongodb-32-rhel7:3.2
+      imagePullPolicy: IfNotPresent
+      name: mongo-container
+      ports:
+      - containerPort: 27017
+        protocol: TCP
+      readinessProbe:
+        exec:
+          command:
+          - stat
+          - /tmp/initialized
+        failureThreshold: 3
+        periodSeconds: 10
+        successThreshold: 1
+        timeoutSeconds: 1
+      resources:
+        limits:
+          cpu: 500m
+          memory: 1536Mi
+        requests:
+          cpu: 50m
+          memory: 256Mi
+      securityContext:
+        capabilities:
+          drop:
+          - KILL
+          - MKNOD
+          - SETGID
+          - SETUID
+        privileged: false
+        runAsUser: 1003580000
+        seLinuxOptions:
+          level: s0:c60,c20
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /var/lib/mongodb/data
+        name: mongo-data
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: default-token-v2nbr
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    hostname: mongodb-2
+    imagePullSecrets:
+    - name: default-dockercfg-2qwvz
+    nodeName: node2.na37.internal
+    nodeSelector:
+      env: users
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    securityContext:
+      fsGroup: 1003580000
+      seLinuxOptions:
+        level: s0:c60,c20
+    serviceAccount: default
+    serviceAccountName: default
+    subdomain: mongodb-internal
+    terminationGracePeriodSeconds: 30
+    volumes:
+    - name: mongo-data
+      persistentVolumeClaim:
+        claimName: mongo-data-mongodb-2
+    - name: default-token-v2nbr
+      secret:
+        defaultMode: 420
+        secretName: default-token-v2nbr
+  status:
+    phase: Pending
+    qosClass: Burstable
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    annotations:
+      kubernetes.io/created-by: |
+        {"kind":"SerializedReference","apiVersion":"v1","reference":{"kind":"ReplicationController","namespace":"lpierson-parkmap-prod","name":"nationalparks-blue-3","uid":"c9abbcac-30fe-11e8-8c2f-0237abc1361e","apiVersion":"v1","resourceVersion":"22843104"}}
+      kubernetes.io/limit-ranger: 'LimitRanger plugin set: cpu, memory request for
+        container nationalparks-blue; cpu, memory limit for container nationalparks-blue'
+      openshift.io/deployment-config.latest-version: "3"
+      openshift.io/deployment-config.name: nationalparks-blue
+      openshift.io/deployment.name: nationalparks-blue-3
+      openshift.io/generated-by: OpenShiftNewApp
+      openshift.io/scc: restricted
+    creationTimestamp: null
+    generateName: nationalparks-blue-3-
+    labels:
+      app: nationalparks-blue
+      deployment: nationalparks-blue-3
+      deploymentconfig: nationalparks-blue
+    ownerReferences:
+    - apiVersion: v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ReplicationController
+      name: nationalparks-blue-3
+      uid: c9abbcac-30fe-11e8-8c2f-0237abc1361e
+  spec:
+    containers:
+    - env:
+      - name: DB_HOST
+        value: mongodb
+      - name: DB_PORT
+        value: "27017"
+      - name: DB_USERNAME
+        value: mongodb
+      - name: DB_PASSWORD
+        value: mongodb
+      - name: DB_NAME
+        value: parks
+      - name: DB_REPLICASET
+        value: rs0
+      image: docker-registry.default.svc:5000/lpierson-parkmap-dev/nationalparks:1.4.0.RELEASE-13
+      imagePullPolicy: IfNotPresent
+      name: nationalparks-blue
+      resources:
+        limits:
+          cpu: 500m
+          memory: 1536Mi
+        requests:
+          cpu: 50m
+          memory: 256Mi
+      securityContext:
+        capabilities:
+          drop:
+          - KILL
+          - MKNOD
+          - SETGID
+          - SETUID
+        privileged: false
+        runAsUser: 1003580000
+        seLinuxOptions:
+          level: s0:c60,c20
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /opt/eap/standalone/configuration/application-users.properties
+        name: jboss-config
+        subPath: application-users.properties
+      - mountPath: /opt/eap/standalone/configuration/application-roles.properties
+        name: jboss-config1
+        subPath: application-roles.properties
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: default-token-v2nbr
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    imagePullSecrets:
+    - name: default-dockercfg-2qwvz
+    nodeName: node1.na37.internal
+    nodeSelector:
+      env: users
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    securityContext:
+      fsGroup: 1003580000
+      seLinuxOptions:
+        level: s0:c60,c20
+    serviceAccount: default
+    serviceAccountName: default
+    terminationGracePeriodSeconds: 30
+    volumes:
+    - configMap:
+        defaultMode: 420
+        name: nationalparks-blue-config
+      name: jboss-config
+    - configMap:
+        defaultMode: 420
+        name: nationalparks-blue-config
+      name: jboss-config1
+    - name: default-token-v2nbr
+      secret:
+        defaultMode: 420
+        secretName: default-token-v2nbr
+  status:
+    phase: Pending
+    qosClass: Burstable
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    annotations:
+      kubernetes.io/limit-ranger: 'LimitRanger plugin set: cpu, memory request for
+        container deployment; cpu, memory limit for container deployment'
+      openshift.io/deployment.name: nationalparks-green-1
+      openshift.io/scc: restricted
+    creationTimestamp: null
+    labels:
+      openshift.io/deployer-pod-for.name: nationalparks-green-1
+    name: nationalparks-green-1-deploy
+    ownerReferences:
+    - apiVersion: v1
+      kind: ReplicationController
+      name: nationalparks-green-1
+      uid: f50555ad-2f81-11e8-8c2f-0237abc1361e
+  spec:
+    activeDeadlineSeconds: 21600
+    containers:
+    - env:
+      - name: KUBERNETES_MASTER
+        value: https://master1.na37.internal
+      - name: OPENSHIFT_MASTER
+        value: https://master1.na37.internal
+      - name: BEARER_TOKEN_FILE
+        value: /var/run/secrets/kubernetes.io/serviceaccount/token
+      - name: OPENSHIFT_CA_DATA
+        value: |
+          -----BEGIN CERTIFICATE-----
+          MIIC6jCCAdKgAwIBAgIBATANBgkqhkiG9w0BAQsFADAmMSQwIgYDVQQDDBtvcGVu
+          c2hpZnQtc2lnbmVyQDE1MTg0NTAwNzEwHhcNMTgwMjEyMTU0MTEwWhcNMjMwMjEx
+          MTU0MTExWjAmMSQwIgYDVQQDDBtvcGVuc2hpZnQtc2lnbmVyQDE1MTg0NTAwNzEw
+          ggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCrWJGmxyKq76hT7ljrqvTs
+          0wOjt1GavvFnTxJOAmy3GgyDtb7krc0l/ijn7P+QfT0kNJ6pJnvjckMszEDP0yIk
+          a2hkA+nwdQULF/jxBFNReN7YlWVYHvt/wu3celRi2tcymsFPiIFl90SwlXJId/mV
+          NriZ+MI5GbdGI32fbT1djXQjkbmEbj+dgW2Z1D/SDaU742vgBRUOJuE5uZlOJGDd
+          zIIQNf1LuqUpaxyGtjTpYMJ5vTHEki/LYdXa9QvAze6E3Zy1vgSYKeNwCBWroZz3
+          aEM9mbtmZnUvGZ0OaoINr+NQrIebmpzx+8CDuP7Vs6Kx/xh0XjQJ9KeEO5nZqMSD
+          AgMBAAGjIzAhMA4GA1UdDwEB/wQEAwICpDAPBgNVHRMBAf8EBTADAQH/MA0GCSqG
+          SIb3DQEBCwUAA4IBAQCO2UxGoEu1ZaT6hqJcPf9jZvdCgJZF1njGP8IQ3fot+wFA
+          by5h0R7w3bMOR8AcsiSahBt467c3Wn9OxKpmiHwMpzibWaAm5Ak3+A03utrgQPQM
+          9j8jJbmpRMwGSjQlmmnpPIxSsHKvzKGZuAg4M9QBpzjxr3LRIDjBr0bu24WisHpn
+          8uub84Ow94SKO5TjOA9RsVTHqIrrAedMTKiPonMg2jKxc8vJidULUJ2p5kgyi9bP
+          4Hee7blZExCq4umOSWdN7bUsmuVHmlms4Lp14OHJ3yBrqeWXJtc8G1HJu20d9lGs
+          F4FEPbL8Zc17p12R9VDfJHr7n6xQ0+yixCZTLER9
+          -----END CERTIFICATE-----
+      - name: OPENSHIFT_DEPLOYMENT_NAME
+        value: nationalparks-green-1
+      - name: OPENSHIFT_DEPLOYMENT_NAMESPACE
+        value: lpierson-parkmap-prod
+      image: openshift3/ose-deployer:v3.7.23
+      imagePullPolicy: IfNotPresent
+      name: deployment
+      resources:
+        limits:
+          cpu: 500m
+          memory: 1536Mi
+        requests:
+          cpu: 50m
+          memory: 256Mi
+      securityContext:
+        capabilities:
+          drop:
+          - KILL
+          - MKNOD
+          - SETGID
+          - SETUID
+        privileged: false
+        runAsUser: 1003580000
+        seLinuxOptions:
+          level: s0:c60,c20
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: deployer-token-65c59
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    imagePullSecrets:
+    - name: deployer-dockercfg-6nktz
+    nodeName: node2.na37.internal
+    nodeSelector:
+      env: users
+    restartPolicy: Never
+    schedulerName: default-scheduler
+    securityContext:
+      fsGroup: 1003580000
+      seLinuxOptions:
+        level: s0:c60,c20
+    serviceAccount: deployer
+    serviceAccountName: deployer
+    terminationGracePeriodSeconds: 10
+    volumes:
+    - name: deployer-token-65c59
+      secret:
+        defaultMode: 420
+        secretName: deployer-token-65c59
+  status:
+    phase: Pending
+    qosClass: Burstable
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    annotations:
+      kubernetes.io/created-by: |
+        {"kind":"SerializedReference","apiVersion":"v1","reference":{"kind":"ReplicationController","namespace":"lpierson-parkmap-prod","name":"nationalparks-green-5","uid":"8d71f7bb-311f-11e8-8c2f-0237abc1361e","apiVersion":"v1","resourceVersion":"23028856"}}
+      kubernetes.io/limit-ranger: 'LimitRanger plugin set: cpu, memory request for
+        container nationalparks-green; cpu, memory limit for container nationalparks-green'
+      openshift.io/deployment-config.latest-version: "5"
+      openshift.io/deployment-config.name: nationalparks-green
+      openshift.io/deployment.name: nationalparks-green-5
+      openshift.io/generated-by: OpenShiftNewApp
+      openshift.io/scc: restricted
+    creationTimestamp: null
+    generateName: nationalparks-green-5-
+    labels:
+      app: nationalparks-green
+      deployment: nationalparks-green-5
+      deploymentconfig: nationalparks-green
+    ownerReferences:
+    - apiVersion: v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ReplicationController
+      name: nationalparks-green-5
+      uid: 8d71f7bb-311f-11e8-8c2f-0237abc1361e
+  spec:
+    containers:
+    - env:
+      - name: DB_HOST
+        value: mongodb
+      - name: DB_PORT
+        value: "27017"
+      - name: DB_USERNAME
+        value: mongodb
+      - name: DB_PASSWORD
+        value: mongodb
+      - name: DB_NAME
+        value: parks
+      - name: DB_REPLICASET
+        value: rs0
+      image: docker-registry.default.svc:5000/lpierson-parkmap-dev/nationalparks:1.4.0.RELEASE-2
+      imagePullPolicy: IfNotPresent
+      name: nationalparks-green
+      resources:
+        limits:
+          cpu: 500m
+          memory: 1536Mi
+        requests:
+          cpu: 50m
+          memory: 256Mi
+      securityContext:
+        capabilities:
+          drop:
+          - KILL
+          - MKNOD
+          - SETGID
+          - SETUID
+        privileged: false
+        runAsUser: 1003580000
+        seLinuxOptions:
+          level: s0:c60,c20
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /opt/eap/standalone/configuration/application-users.properties
+        name: jboss-config
+        subPath: application-users.properties
+      - mountPath: /opt/eap/standalone/configuration/application-roles.properties
+        name: jboss-config1
+        subPath: application-roles.properties
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: default-token-v2nbr
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    imagePullSecrets:
+    - name: default-dockercfg-2qwvz
+    nodeName: node1.na37.internal
+    nodeSelector:
+      env: users
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    securityContext:
+      fsGroup: 1003580000
+      seLinuxOptions:
+        level: s0:c60,c20
+    serviceAccount: default
+    serviceAccountName: default
+    terminationGracePeriodSeconds: 30
+    volumes:
+    - configMap:
+        defaultMode: 420
+        name: nationalparks-green-config
+      name: jboss-config
+    - configMap:
+        defaultMode: 420
+        name: nationalparks-green-config
+      name: jboss-config1
+    - name: default-token-v2nbr
+      secret:
+        defaultMode: 420
+        secretName: default-token-v2nbr
+  status:
+    phase: Pending
+    qosClass: Burstable
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    annotations:
+      kubernetes.io/created-by: |
+        {"kind":"SerializedReference","apiVersion":"v1","reference":{"kind":"ReplicationController","namespace":"lpierson-parkmap-prod","name":"parksmap-blue-2","uid":"486bf18a-3106-11e8-8c2f-0237abc1361e","apiVersion":"v1","resourceVersion":"22954275"}}
+      kubernetes.io/limit-ranger: 'LimitRanger plugin set: cpu, memory request for
+        container parksmap-blue; cpu, memory limit for container parksmap-blue'
+      openshift.io/deployment-config.latest-version: "2"
+      openshift.io/deployment-config.name: parksmap-blue
+      openshift.io/deployment.name: parksmap-blue-2
+      openshift.io/generated-by: OpenShiftNewApp
+      openshift.io/scc: restricted
+    creationTimestamp: null
+    generateName: parksmap-blue-2-
+    labels:
+      app: parksmap-blue
+      deployment: parksmap-blue-2
+      deploymentconfig: parksmap-blue
+    ownerReferences:
+    - apiVersion: v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ReplicationController
+      name: parksmap-blue-2
+      uid: 486bf18a-3106-11e8-8c2f-0237abc1361e
+  spec:
+    containers:
+    - image: docker-registry.default.svc:5000/lpierson-parkmap-dev/parksmap:1.4.0.RELEASE-5
+      imagePullPolicy: IfNotPresent
+      name: parksmap-blue
+      resources:
+        limits:
+          cpu: 500m
+          memory: 1536Mi
+        requests:
+          cpu: 50m
+          memory: 256Mi
+      securityContext:
+        capabilities:
+          drop:
+          - KILL
+          - MKNOD
+          - SETGID
+          - SETUID
+        privileged: false
+        runAsUser: 1003580000
+        seLinuxOptions:
+          level: s0:c60,c20
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: default-token-v2nbr
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    imagePullSecrets:
+    - name: default-dockercfg-2qwvz
+    nodeName: node2.na37.internal
+    nodeSelector:
+      env: users
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    securityContext:
+      fsGroup: 1003580000
+      seLinuxOptions:
+        level: s0:c60,c20
+    serviceAccount: default
+    serviceAccountName: default
+    terminationGracePeriodSeconds: 30
+    volumes:
+    - name: default-token-v2nbr
+      secret:
+        defaultMode: 420
+        secretName: default-token-v2nbr
+  status:
+    phase: Pending
+    qosClass: Burstable
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    annotations:
+      kubernetes.io/created-by: |
+        {"kind":"SerializedReference","apiVersion":"v1","reference":{"kind":"ReplicationController","namespace":"lpierson-parkmap-prod","name":"parksmap-green-2","uid":"2be87ad2-3116-11e8-8c2f-0237abc1361e","apiVersion":"v1","resourceVersion":"22975659"}}
+      kubernetes.io/limit-ranger: 'LimitRanger plugin set: cpu, memory request for
+        container parksmap-green; cpu, memory limit for container parksmap-green'
+      openshift.io/deployment-config.latest-version: "2"
+      openshift.io/deployment-config.name: parksmap-green
+      openshift.io/deployment.name: parksmap-green-2
+      openshift.io/generated-by: OpenShiftNewApp
+      openshift.io/scc: restricted
+    creationTimestamp: null
+    generateName: parksmap-green-2-
+    labels:
+      app: parksmap-green
+      deployment: parksmap-green-2
+      deploymentconfig: parksmap-green
+    ownerReferences:
+    - apiVersion: v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ReplicationController
+      name: parksmap-green-2
+      uid: 2be87ad2-3116-11e8-8c2f-0237abc1361e
+  spec:
+    containers:
+    - image: docker-registry.default.svc:5000/lpierson-parkmap-dev/parksmap:1.4.0.RELEASE-6
+      imagePullPolicy: IfNotPresent
+      name: parksmap-green
+      resources:
+        limits:
+          cpu: 500m
+          memory: 1536Mi
+        requests:
+          cpu: 50m
+          memory: 256Mi
+      securityContext:
+        capabilities:
+          drop:
+          - KILL
+          - MKNOD
+          - SETGID
+          - SETUID
+        privileged: false
+        runAsUser: 1003580000
+        seLinuxOptions:
+          level: s0:c60,c20
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: default-token-v2nbr
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    imagePullSecrets:
+    - name: default-dockercfg-2qwvz
+    nodeName: node1.na37.internal
+    nodeSelector:
+      env: users
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    securityContext:
+      fsGroup: 1003580000
+      seLinuxOptions:
+        level: s0:c60,c20
+    serviceAccount: default
+    serviceAccountName: default
+    terminationGracePeriodSeconds: 30
+    volumes:
+    - name: default-token-v2nbr
+      secret:
+        defaultMode: 420
+        secretName: default-token-v2nbr
+  status:
+    phase: Pending
+    qosClass: Burstable
+- apiVersion: v1
+  kind: ReplicationController
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/original-replicas: "1"
+      openshift.io/deployer-pod.completed-at: 2018-03-26 16:59:32 +0000 UTC
+      openshift.io/deployer-pod.created-at: 2018-03-26 16:59:21 +0000 UTC
+      openshift.io/deployer-pod.name: mlbparks-blue-1-deploy
+      openshift.io/deployment-config.latest-version: "1"
+      openshift.io/deployment-config.name: mlbparks-blue
+      openshift.io/deployment.phase: Complete
+      openshift.io/deployment.replicas: "1"
+      openshift.io/deployment.status-reason: manual change
+      openshift.io/encoded-deployment-config: |
+        {"kind":"DeploymentConfig","apiVersion":"v1","metadata":{"name":"mlbparks-blue","namespace":"lpierson-parkmap-prod","selfLink":"/apis/apps.openshift.io/v1/namespaces/lpierson-parkmap-prod/deploymentconfigs/mlbparks-blue","uid":"0e638db2-2f5e-11e8-8c2f-0237abc1361e","resourceVersion":"22980488","generation":7,"creationTimestamp":"2018-03-24T12:22:44Z","labels":{"app":"mlbparks-blue"},"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"}},"spec":{"strategy":{"type":"Rolling","rollingParams":{"updatePeriodSeconds":1,"intervalSeconds":1,"timeoutSeconds":600,"maxUnavailable":"25%","maxSurge":"25%"},"resources":{},"activeDeadlineSeconds":21600},"triggers":[],"replicas":1,"revisionHistoryLimit":10,"test":false,"selector":{"app":"mlbparks-blue","deploymentconfig":"mlbparks-blue"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"mlbparks-blue","deploymentconfig":"mlbparks-blue"},"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"}},"spec":{"volumes":[{"name":"jboss-config","configMap":{"name":"mlbparks-blue-config","defaultMode":420}},{"name":"jboss-config1","configMap":{"name":"mlbparks-blue-config","defaultMode":420}}],"containers":[{"name":"mlbparks-blue","image":"docker-registry.default.svc:5000/lpierson-parkmap-dev/mlbparks:1.0-40","env":[{"name":"DB_HOST","value":"mongodb"},{"name":"DB_PORT","value":"27017"},{"name":"DB_USERNAME","value":"mongodb"},{"name":"DB_PASSWORD","value":"mongodb"},{"name":"DB_NAME","value":"parks"},{"name":"DB_REPLICASET","value":"rs0"}],"resources":{},"volumeMounts":[{"name":"jboss-config","mountPath":"/opt/eap/standalone/configuration/application-users.properties","subPath":"application-users.properties"},{"name":"jboss-config1","mountPath":"/opt/eap/standalone/configuration/application-roles.properties","subPath":"application-roles.properties"}],"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File","imagePullPolicy":"IfNotPresent"}],"restartPolicy":"Always","terminationGracePeriodSeconds":30,"dnsPolicy":"ClusterFirst","securityContext":{},"schedulerName":"default-scheduler"}}},"status":{"latestVersion":1,"observedGeneration":6,"replicas":0,"updatedReplicas":0,"availableReplicas":0,"unavailableReplicas":0,"details":{"message":"manual change","causes":[{"type":"Manual"}]},"conditions":[{"type":"Available","status":"False","lastUpdateTime":"2018-03-24T12:22:46Z","lastTransitionTime":"2018-03-24T12:22:46Z","message":"Deployment config does not have minimum availability."}]}}
+      openshift.io/jenkins-build-uri: https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/mlbparks-tasks/40/
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: mlbparks-blue
+      openshift.io/deployment-config.name: mlbparks-blue
+    name: mlbparks-blue-1
+    ownerReferences:
+    - apiVersion: apps.openshift.io/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: DeploymentConfig
+      name: mlbparks-blue
+      uid: 0e638db2-2f5e-11e8-8c2f-0237abc1361e
+  spec:
+    replicas: 0
+    selector:
+      app: mlbparks-blue
+      deployment: mlbparks-blue-1
+      deploymentconfig: mlbparks-blue
+    template:
+      metadata:
+        annotations:
+          openshift.io/deployment-config.latest-version: "1"
+          openshift.io/deployment-config.name: mlbparks-blue
+          openshift.io/deployment.name: mlbparks-blue-1
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: mlbparks-blue
+          deployment: mlbparks-blue-1
+          deploymentconfig: mlbparks-blue
+      spec:
+        containers:
+        - env:
+          - name: DB_HOST
+            value: mongodb
+          - name: DB_PORT
+            value: "27017"
+          - name: DB_USERNAME
+            value: mongodb
+          - name: DB_PASSWORD
+            value: mongodb
+          - name: DB_NAME
+            value: parks
+          - name: DB_REPLICASET
+            value: rs0
+          image: docker-registry.default.svc:5000/lpierson-parkmap-dev/mlbparks:1.0-40
+          imagePullPolicy: IfNotPresent
+          name: mlbparks-blue
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /opt/eap/standalone/configuration/application-users.properties
+            name: jboss-config
+            subPath: application-users.properties
+          - mountPath: /opt/eap/standalone/configuration/application-roles.properties
+            name: jboss-config1
+            subPath: application-roles.properties
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - configMap:
+            defaultMode: 420
+            name: mlbparks-blue-config
+          name: jboss-config
+        - configMap:
+            defaultMode: 420
+            name: mlbparks-blue-config
+          name: jboss-config1
+  status:
+    replicas: 0
+- apiVersion: v1
+  kind: ReplicationController
+  metadata:
+    annotations:
+      openshift.io/deployer-pod.completed-at: 2018-03-26 17:25:08 +0000 UTC
+      openshift.io/deployer-pod.created-at: 2018-03-26 17:24:53 +0000 UTC
+      openshift.io/deployer-pod.name: mlbparks-blue-2-deploy
+      openshift.io/deployment-config.latest-version: "2"
+      openshift.io/deployment-config.name: mlbparks-blue
+      openshift.io/deployment.phase: Complete
+      openshift.io/deployment.replicas: ""
+      openshift.io/deployment.status-reason: manual change
+      openshift.io/encoded-deployment-config: |
+        {"kind":"DeploymentConfig","apiVersion":"v1","metadata":{"name":"mlbparks-blue","namespace":"lpierson-parkmap-prod","selfLink":"/apis/apps.openshift.io/v1/namespaces/lpierson-parkmap-prod/deploymentconfigs/mlbparks-blue","uid":"0e638db2-2f5e-11e8-8c2f-0237abc1361e","resourceVersion":"23000565","generation":9,"creationTimestamp":"2018-03-24T12:22:44Z","labels":{"app":"mlbparks-blue"},"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"}},"spec":{"strategy":{"type":"Rolling","rollingParams":{"updatePeriodSeconds":1,"intervalSeconds":1,"timeoutSeconds":600,"maxUnavailable":"25%","maxSurge":"25%"},"resources":{},"activeDeadlineSeconds":21600},"triggers":[],"replicas":1,"revisionHistoryLimit":10,"test":false,"selector":{"app":"mlbparks-blue","deploymentconfig":"mlbparks-blue"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"mlbparks-blue","deploymentconfig":"mlbparks-blue"},"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"}},"spec":{"volumes":[{"name":"jboss-config","configMap":{"name":"mlbparks-blue-config","defaultMode":420}},{"name":"jboss-config1","configMap":{"name":"mlbparks-blue-config","defaultMode":420}}],"containers":[{"name":"mlbparks-blue","image":"docker-registry.default.svc:5000/lpierson-parkmap-dev/mlbparks:1.0-42","env":[{"name":"DB_HOST","value":"mongodb"},{"name":"DB_PORT","value":"27017"},{"name":"DB_USERNAME","value":"mongodb"},{"name":"DB_PASSWORD","value":"mongodb"},{"name":"DB_NAME","value":"parks"},{"name":"DB_REPLICASET","value":"rs0"}],"resources":{},"volumeMounts":[{"name":"jboss-config","mountPath":"/opt/eap/standalone/configuration/application-users.properties","subPath":"application-users.properties"},{"name":"jboss-config1","mountPath":"/opt/eap/standalone/configuration/application-roles.properties","subPath":"application-roles.properties"}],"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File","imagePullPolicy":"IfNotPresent"}],"restartPolicy":"Always","terminationGracePeriodSeconds":30,"dnsPolicy":"ClusterFirst","securityContext":{},"schedulerName":"default-scheduler"}}},"status":{"latestVersion":2,"observedGeneration":8,"replicas":1,"updatedReplicas":1,"availableReplicas":1,"unavailableReplicas":0,"details":{"message":"manual change","causes":[{"type":"Manual"}]},"conditions":[{"type":"Available","status":"True","lastUpdateTime":"2018-03-26T16:59:32Z","lastTransitionTime":"2018-03-26T16:59:32Z","message":"Deployment config has minimum availability."},{"type":"Progressing","status":"True","lastUpdateTime":"2018-03-26T16:59:33Z","lastTransitionTime":"2018-03-26T16:59:26Z","reason":"NewReplicationControllerAvailable","message":"replication controller \"mlbparks-blue-1\" successfully rolled out"}],"readyReplicas":1}}
+      openshift.io/jenkins-build-uri: https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/mlbparks-tasks/42/
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: mlbparks-blue
+      openshift.io/deployment-config.name: mlbparks-blue
+    name: mlbparks-blue-2
+    ownerReferences:
+    - apiVersion: apps.openshift.io/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: DeploymentConfig
+      name: mlbparks-blue
+      uid: 0e638db2-2f5e-11e8-8c2f-0237abc1361e
+  spec:
+    replicas: 1
+    selector:
+      app: mlbparks-blue
+      deployment: mlbparks-blue-2
+      deploymentconfig: mlbparks-blue
+    template:
+      metadata:
+        annotations:
+          openshift.io/deployment-config.latest-version: "2"
+          openshift.io/deployment-config.name: mlbparks-blue
+          openshift.io/deployment.name: mlbparks-blue-2
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: mlbparks-blue
+          deployment: mlbparks-blue-2
+          deploymentconfig: mlbparks-blue
+      spec:
+        containers:
+        - env:
+          - name: DB_HOST
+            value: mongodb
+          - name: DB_PORT
+            value: "27017"
+          - name: DB_USERNAME
+            value: mongodb
+          - name: DB_PASSWORD
+            value: mongodb
+          - name: DB_NAME
+            value: parks
+          - name: DB_REPLICASET
+            value: rs0
+          image: docker-registry.default.svc:5000/lpierson-parkmap-dev/mlbparks:1.0-42
+          imagePullPolicy: IfNotPresent
+          name: mlbparks-blue
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /opt/eap/standalone/configuration/application-users.properties
+            name: jboss-config
+            subPath: application-users.properties
+          - mountPath: /opt/eap/standalone/configuration/application-roles.properties
+            name: jboss-config1
+            subPath: application-roles.properties
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - configMap:
+            defaultMode: 420
+            name: mlbparks-blue-config
+          name: jboss-config
+        - configMap:
+            defaultMode: 420
+            name: mlbparks-blue-config
+          name: jboss-config1
+  status:
+    replicas: 0
+- apiVersion: v1
+  kind: ReplicationController
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/original-replicas: "1"
+      openshift.io/deployer-pod.completed-at: 2018-03-24 12:37:31 +0000 UTC
+      openshift.io/deployer-pod.created-at: 2018-03-24 12:37:23 +0000 UTC
+      openshift.io/deployer-pod.name: mlbparks-green-1-deploy
+      openshift.io/deployment-config.latest-version: "1"
+      openshift.io/deployment-config.name: mlbparks-green
+      openshift.io/deployment.phase: Complete
+      openshift.io/deployment.replicas: "1"
+      openshift.io/deployment.status-reason: manual change
+      openshift.io/encoded-deployment-config: |
+        {"kind":"DeploymentConfig","apiVersion":"v1","metadata":{"name":"mlbparks-green","namespace":"lpierson-parkmap-prod","selfLink":"/apis/apps.openshift.io/v1/namespaces/lpierson-parkmap-prod/deploymentconfigs/mlbparks-green","uid":"10a1f006-2f5e-11e8-8c2f-0237abc1361e","resourceVersion":"20773450","generation":6,"creationTimestamp":"2018-03-24T12:22:48Z","labels":{"app":"mlbparks-green"},"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"}},"spec":{"strategy":{"type":"Rolling","rollingParams":{"updatePeriodSeconds":1,"intervalSeconds":1,"timeoutSeconds":600,"maxUnavailable":"25%","maxSurge":"25%"},"resources":{},"activeDeadlineSeconds":21600},"triggers":[],"replicas":1,"revisionHistoryLimit":10,"test":false,"selector":{"app":"mlbparks-green","deploymentconfig":"mlbparks-green"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"mlbparks-green","deploymentconfig":"mlbparks-green"},"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"}},"spec":{"volumes":[{"name":"jboss-config","configMap":{"name":"mlbparks-green-config","defaultMode":420}},{"name":"jboss-config1","configMap":{"name":"mlbparks-green-config","defaultMode":420}}],"containers":[{"name":"mlbparks-green","image":"docker-registry.default.svc:5000/lpierson-parkmap-dev/mlbparks:1.0","resources":{},"volumeMounts":[{"name":"jboss-config","mountPath":"/opt/eap/standalone/configuration/application-users.properties","subPath":"application-users.properties"},{"name":"jboss-config1","mountPath":"/opt/eap/standalone/configuration/application-roles.properties","subPath":"application-roles.properties"}],"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File","imagePullPolicy":"IfNotPresent"}],"restartPolicy":"Always","terminationGracePeriodSeconds":30,"dnsPolicy":"ClusterFirst","securityContext":{},"schedulerName":"default-scheduler"}}},"status":{"latestVersion":1,"observedGeneration":5,"replicas":0,"updatedReplicas":0,"availableReplicas":0,"unavailableReplicas":0,"details":{"message":"manual change","causes":[{"type":"Manual"}]},"conditions":[{"type":"Available","status":"False","lastUpdateTime":"2018-03-24T12:22:48Z","lastTransitionTime":"2018-03-24T12:22:48Z","message":"Deployment config does not have minimum availability."}]}}
+      openshift.io/jenkins-build-uri: https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/mlbparks-tasks/39/
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: mlbparks-green
+      openshift.io/deployment-config.name: mlbparks-green
+    name: mlbparks-green-1
+    ownerReferences:
+    - apiVersion: apps.openshift.io/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: DeploymentConfig
+      name: mlbparks-green
+      uid: 10a1f006-2f5e-11e8-8c2f-0237abc1361e
+  spec:
+    replicas: 0
+    selector:
+      app: mlbparks-green
+      deployment: mlbparks-green-1
+      deploymentconfig: mlbparks-green
+    template:
+      metadata:
+        annotations:
+          openshift.io/deployment-config.latest-version: "1"
+          openshift.io/deployment-config.name: mlbparks-green
+          openshift.io/deployment.name: mlbparks-green-1
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: mlbparks-green
+          deployment: mlbparks-green-1
+          deploymentconfig: mlbparks-green
+      spec:
+        containers:
+        - image: docker-registry.default.svc:5000/lpierson-parkmap-dev/mlbparks:1.0
+          imagePullPolicy: IfNotPresent
+          name: mlbparks-green
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /opt/eap/standalone/configuration/application-users.properties
+            name: jboss-config
+            subPath: application-users.properties
+          - mountPath: /opt/eap/standalone/configuration/application-roles.properties
+            name: jboss-config1
+            subPath: application-roles.properties
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - configMap:
+            defaultMode: 420
+            name: mlbparks-green-config
+          name: jboss-config
+        - configMap:
+            defaultMode: 420
+            name: mlbparks-green-config
+          name: jboss-config1
+  status:
+    replicas: 0
+- apiVersion: v1
+  kind: ReplicationController
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/original-replicas: "1"
+      openshift.io/deployer-pod.completed-at: 2018-03-26 10:30:27 +0000 UTC
+      openshift.io/deployer-pod.created-at: 2018-03-26 10:30:15 +0000 UTC
+      openshift.io/deployer-pod.name: mlbparks-green-2-deploy
+      openshift.io/deployment-config.latest-version: "2"
+      openshift.io/deployment-config.name: mlbparks-green
+      openshift.io/deployment.phase: Complete
+      openshift.io/deployment.replicas: ""
+      openshift.io/deployment.status-reason: manual change
+      openshift.io/encoded-deployment-config: |
+        {"kind":"DeploymentConfig","apiVersion":"v1","metadata":{"name":"mlbparks-green","namespace":"lpierson-parkmap-prod","selfLink":"/apis/apps.openshift.io/v1/namespaces/lpierson-parkmap-prod/deploymentconfigs/mlbparks-green","uid":"10a1f006-2f5e-11e8-8c2f-0237abc1361e","resourceVersion":"22671925","generation":8,"creationTimestamp":"2018-03-24T12:22:48Z","labels":{"app":"mlbparks-green"},"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"}},"spec":{"strategy":{"type":"Rolling","rollingParams":{"updatePeriodSeconds":1,"intervalSeconds":1,"timeoutSeconds":600,"maxUnavailable":"25%","maxSurge":"25%"},"resources":{},"activeDeadlineSeconds":21600},"triggers":[],"replicas":1,"revisionHistoryLimit":10,"test":false,"selector":{"app":"mlbparks-green","deploymentconfig":"mlbparks-green"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"mlbparks-green","deploymentconfig":"mlbparks-green"},"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"}},"spec":{"volumes":[{"name":"jboss-config","configMap":{"name":"mlbparks-green-config","defaultMode":420}},{"name":"jboss-config1","configMap":{"name":"mlbparks-green-config","defaultMode":420}}],"containers":[{"name":"mlbparks-green","image":"docker-registry.default.svc:5000/lpierson-parkmap-dev/mlbparks:1.0","env":[{"name":"DB_HOST","value":"mongodb"},{"name":"DB_PORT","value":"27017"},{"name":"DB_USERNAME","value":"mongodb"},{"name":"DB_PASSWORD","value":"mongodb"},{"name":"DB_NAME","value":"parks"},{"name":"DB_REPLICASET","value":"rs0"}],"resources":{},"volumeMounts":[{"name":"jboss-config","mountPath":"/opt/eap/standalone/configuration/application-users.properties","subPath":"application-users.properties"},{"name":"jboss-config1","mountPath":"/opt/eap/standalone/configuration/application-roles.properties","subPath":"application-roles.properties"}],"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File","imagePullPolicy":"IfNotPresent"}],"restartPolicy":"Always","terminationGracePeriodSeconds":30,"dnsPolicy":"ClusterFirst","securityContext":{},"schedulerName":"default-scheduler"}}},"status":{"latestVersion":2,"observedGeneration":7,"replicas":1,"updatedReplicas":1,"availableReplicas":1,"unavailableReplicas":0,"details":{"message":"manual change","causes":[{"type":"Manual"}]},"conditions":[{"type":"Available","status":"True","lastUpdateTime":"2018-03-24T12:37:31Z","lastTransitionTime":"2018-03-24T12:37:31Z","message":"Deployment config has minimum availability."},{"type":"Progressing","status":"True","lastUpdateTime":"2018-03-24T12:37:32Z","lastTransitionTime":"2018-03-24T12:37:26Z","reason":"NewReplicationControllerAvailable","message":"replication controller \"mlbparks-green-1\" successfully rolled out"}],"readyReplicas":1}}
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: mlbparks-green
+      openshift.io/deployment-config.name: mlbparks-green
+    name: mlbparks-green-2
+    ownerReferences:
+    - apiVersion: apps.openshift.io/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: DeploymentConfig
+      name: mlbparks-green
+      uid: 10a1f006-2f5e-11e8-8c2f-0237abc1361e
+  spec:
+    replicas: 0
+    selector:
+      app: mlbparks-green
+      deployment: mlbparks-green-2
+      deploymentconfig: mlbparks-green
+    template:
+      metadata:
+        annotations:
+          openshift.io/deployment-config.latest-version: "2"
+          openshift.io/deployment-config.name: mlbparks-green
+          openshift.io/deployment.name: mlbparks-green-2
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: mlbparks-green
+          deployment: mlbparks-green-2
+          deploymentconfig: mlbparks-green
+      spec:
+        containers:
+        - env:
+          - name: DB_HOST
+            value: mongodb
+          - name: DB_PORT
+            value: "27017"
+          - name: DB_USERNAME
+            value: mongodb
+          - name: DB_PASSWORD
+            value: mongodb
+          - name: DB_NAME
+            value: parks
+          - name: DB_REPLICASET
+            value: rs0
+          image: docker-registry.default.svc:5000/lpierson-parkmap-dev/mlbparks:1.0
+          imagePullPolicy: IfNotPresent
+          name: mlbparks-green
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /opt/eap/standalone/configuration/application-users.properties
+            name: jboss-config
+            subPath: application-users.properties
+          - mountPath: /opt/eap/standalone/configuration/application-roles.properties
+            name: jboss-config1
+            subPath: application-roles.properties
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - configMap:
+            defaultMode: 420
+            name: mlbparks-green-config
+          name: jboss-config
+        - configMap:
+            defaultMode: 420
+            name: mlbparks-green-config
+          name: jboss-config1
+  status:
+    replicas: 0
+- apiVersion: v1
+  kind: ReplicationController
+  metadata:
+    annotations:
+      openshift.io/deployer-pod.completed-at: 2018-03-26 17:07:35 +0000 UTC
+      openshift.io/deployer-pod.created-at: 2018-03-26 17:07:23 +0000 UTC
+      openshift.io/deployer-pod.name: mlbparks-green-3-deploy
+      openshift.io/deployment-config.latest-version: "3"
+      openshift.io/deployment-config.name: mlbparks-green
+      openshift.io/deployment.phase: Complete
+      openshift.io/deployment.replicas: ""
+      openshift.io/deployment.status-reason: manual change
+      openshift.io/encoded-deployment-config: |
+        {"kind":"DeploymentConfig","apiVersion":"v1","metadata":{"name":"mlbparks-green","namespace":"lpierson-parkmap-prod","selfLink":"/apis/apps.openshift.io/v1/namespaces/lpierson-parkmap-prod/deploymentconfigs/mlbparks-green","uid":"10a1f006-2f5e-11e8-8c2f-0237abc1361e","resourceVersion":"22986939","generation":10,"creationTimestamp":"2018-03-24T12:22:48Z","labels":{"app":"mlbparks-green"},"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"}},"spec":{"strategy":{"type":"Rolling","rollingParams":{"updatePeriodSeconds":1,"intervalSeconds":1,"timeoutSeconds":600,"maxUnavailable":"25%","maxSurge":"25%"},"resources":{},"activeDeadlineSeconds":21600},"triggers":[],"replicas":1,"revisionHistoryLimit":10,"test":false,"selector":{"app":"mlbparks-green","deploymentconfig":"mlbparks-green"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"mlbparks-green","deploymentconfig":"mlbparks-green"},"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"}},"spec":{"volumes":[{"name":"jboss-config","configMap":{"name":"mlbparks-green-config","defaultMode":420}},{"name":"jboss-config1","configMap":{"name":"mlbparks-green-config","defaultMode":420}}],"containers":[{"name":"mlbparks-green","image":"docker-registry.default.svc:5000/lpierson-parkmap-dev/mlbparks:1.0-41","env":[{"name":"DB_HOST","value":"mongodb"},{"name":"DB_PORT","value":"27017"},{"name":"DB_USERNAME","value":"mongodb"},{"name":"DB_PASSWORD","value":"mongodb"},{"name":"DB_NAME","value":"parks"},{"name":"DB_REPLICASET","value":"rs0"}],"resources":{},"volumeMounts":[{"name":"jboss-config","mountPath":"/opt/eap/standalone/configuration/application-users.properties","subPath":"application-users.properties"},{"name":"jboss-config1","mountPath":"/opt/eap/standalone/configuration/application-roles.properties","subPath":"application-roles.properties"}],"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File","imagePullPolicy":"IfNotPresent"}],"restartPolicy":"Always","terminationGracePeriodSeconds":30,"dnsPolicy":"ClusterFirst","securityContext":{},"schedulerName":"default-scheduler"}}},"status":{"latestVersion":3,"observedGeneration":9,"replicas":1,"updatedReplicas":1,"availableReplicas":1,"unavailableReplicas":0,"details":{"message":"manual change","causes":[{"type":"Manual"}]},"conditions":[{"type":"Available","status":"True","lastUpdateTime":"2018-03-24T12:37:31Z","lastTransitionTime":"2018-03-24T12:37:31Z","message":"Deployment config has minimum availability."},{"type":"Progressing","status":"True","lastUpdateTime":"2018-03-26T10:30:28Z","lastTransitionTime":"2018-03-26T10:30:25Z","reason":"NewReplicationControllerAvailable","message":"replication controller \"mlbparks-green-2\" successfully rolled out"}],"readyReplicas":1}}
+      openshift.io/jenkins-build-uri: https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/mlbparks-tasks/41/
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: mlbparks-green
+      openshift.io/deployment-config.name: mlbparks-green
+    name: mlbparks-green-3
+    ownerReferences:
+    - apiVersion: apps.openshift.io/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: DeploymentConfig
+      name: mlbparks-green
+      uid: 10a1f006-2f5e-11e8-8c2f-0237abc1361e
+  spec:
+    replicas: 1
+    selector:
+      app: mlbparks-green
+      deployment: mlbparks-green-3
+      deploymentconfig: mlbparks-green
+    template:
+      metadata:
+        annotations:
+          openshift.io/deployment-config.latest-version: "3"
+          openshift.io/deployment-config.name: mlbparks-green
+          openshift.io/deployment.name: mlbparks-green-3
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: mlbparks-green
+          deployment: mlbparks-green-3
+          deploymentconfig: mlbparks-green
+      spec:
+        containers:
+        - env:
+          - name: DB_HOST
+            value: mongodb
+          - name: DB_PORT
+            value: "27017"
+          - name: DB_USERNAME
+            value: mongodb
+          - name: DB_PASSWORD
+            value: mongodb
+          - name: DB_NAME
+            value: parks
+          - name: DB_REPLICASET
+            value: rs0
+          image: docker-registry.default.svc:5000/lpierson-parkmap-dev/mlbparks:1.0-41
+          imagePullPolicy: IfNotPresent
+          name: mlbparks-green
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /opt/eap/standalone/configuration/application-users.properties
+            name: jboss-config
+            subPath: application-users.properties
+          - mountPath: /opt/eap/standalone/configuration/application-roles.properties
+            name: jboss-config1
+            subPath: application-roles.properties
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - configMap:
+            defaultMode: 420
+            name: mlbparks-green-config
+          name: jboss-config
+        - configMap:
+            defaultMode: 420
+            name: mlbparks-green-config
+          name: jboss-config1
+  status:
+    replicas: 0
+- apiVersion: v1
+  kind: ReplicationController
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/original-replicas: "1"
+      openshift.io/deployer-pod.completed-at: 2018-03-26 08:25:33 +0000 UTC
+      openshift.io/deployer-pod.created-at: 2018-03-26 08:25:21 +0000 UTC
+      openshift.io/deployer-pod.name: nationalparks-blue-1-deploy
+      openshift.io/deployment-config.latest-version: "1"
+      openshift.io/deployment-config.name: nationalparks-blue
+      openshift.io/deployment.phase: Complete
+      openshift.io/deployment.replicas: "1"
+      openshift.io/deployment.status-reason: manual change
+      openshift.io/encoded-deployment-config: |
+        {"kind":"DeploymentConfig","apiVersion":"v1","metadata":{"name":"nationalparks-blue","namespace":"lpierson-parkmap-prod","selfLink":"/apis/apps.openshift.io/v1/namespaces/lpierson-parkmap-prod/deploymentconfigs/nationalparks-blue","uid":"1aa7c35f-2f5e-11e8-8c2f-0237abc1361e","resourceVersion":"22573666","generation":6,"creationTimestamp":"2018-03-24T12:23:05Z","labels":{"app":"nationalparks-blue"},"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"}},"spec":{"strategy":{"type":"Rolling","rollingParams":{"updatePeriodSeconds":1,"intervalSeconds":1,"timeoutSeconds":600,"maxUnavailable":"25%","maxSurge":"25%"},"resources":{},"activeDeadlineSeconds":21600},"triggers":[],"replicas":1,"revisionHistoryLimit":10,"test":false,"selector":{"app":"nationalparks-blue","deploymentconfig":"nationalparks-blue"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"nationalparks-blue","deploymentconfig":"nationalparks-blue"},"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"}},"spec":{"volumes":[{"name":"jboss-config","configMap":{"name":"nationalparks-blue-config","defaultMode":420}},{"name":"jboss-config1","configMap":{"name":"nationalparks-blue-config","defaultMode":420}}],"containers":[{"name":"nationalparks-blue","image":"docker-registry.default.svc:5000/lpierson-parkmap-dev/nationalparks:1.4.0.RELEASE","resources":{},"volumeMounts":[{"name":"jboss-config","mountPath":"/opt/eap/standalone/configuration/application-users.properties","subPath":"application-users.properties"},{"name":"jboss-config1","mountPath":"/opt/eap/standalone/configuration/application-roles.properties","subPath":"application-roles.properties"}],"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File","imagePullPolicy":"IfNotPresent"}],"restartPolicy":"Always","terminationGracePeriodSeconds":30,"dnsPolicy":"ClusterFirst","securityContext":{},"schedulerName":"default-scheduler"}}},"status":{"latestVersion":1,"observedGeneration":5,"replicas":0,"updatedReplicas":0,"availableReplicas":0,"unavailableReplicas":0,"details":{"message":"manual change","causes":[{"type":"Manual"}]},"conditions":[{"type":"Available","status":"False","lastUpdateTime":"2018-03-24T12:23:05Z","lastTransitionTime":"2018-03-24T12:23:05Z","message":"Deployment config does not have minimum availability."}]}}
+      openshift.io/jenkins-build-uri: https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/nationalparks-tasks/9/
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: nationalparks-blue
+      openshift.io/deployment-config.name: nationalparks-blue
+    name: nationalparks-blue-1
+    ownerReferences:
+    - apiVersion: apps.openshift.io/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: DeploymentConfig
+      name: nationalparks-blue
+      uid: 1aa7c35f-2f5e-11e8-8c2f-0237abc1361e
+  spec:
+    replicas: 0
+    selector:
+      app: nationalparks-blue
+      deployment: nationalparks-blue-1
+      deploymentconfig: nationalparks-blue
+    template:
+      metadata:
+        annotations:
+          openshift.io/deployment-config.latest-version: "1"
+          openshift.io/deployment-config.name: nationalparks-blue
+          openshift.io/deployment.name: nationalparks-blue-1
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: nationalparks-blue
+          deployment: nationalparks-blue-1
+          deploymentconfig: nationalparks-blue
+      spec:
+        containers:
+        - image: docker-registry.default.svc:5000/lpierson-parkmap-dev/nationalparks:1.4.0.RELEASE
+          imagePullPolicy: IfNotPresent
+          name: nationalparks-blue
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /opt/eap/standalone/configuration/application-users.properties
+            name: jboss-config
+            subPath: application-users.properties
+          - mountPath: /opt/eap/standalone/configuration/application-roles.properties
+            name: jboss-config1
+            subPath: application-roles.properties
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - configMap:
+            defaultMode: 420
+            name: nationalparks-blue-config
+          name: jboss-config
+        - configMap:
+            defaultMode: 420
+            name: nationalparks-blue-config
+          name: jboss-config1
+  status:
+    replicas: 0
+- apiVersion: v1
+  kind: ReplicationController
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/original-replicas: "1"
+      openshift.io/deployer-pod.completed-at: 2018-03-26 10:39:51 +0000 UTC
+      openshift.io/deployer-pod.created-at: 2018-03-26 10:39:36 +0000 UTC
+      openshift.io/deployer-pod.name: nationalparks-blue-2-deploy
+      openshift.io/deployment-config.latest-version: "2"
+      openshift.io/deployment-config.name: nationalparks-blue
+      openshift.io/deployment.phase: Complete
+      openshift.io/deployment.replicas: ""
+      openshift.io/deployment.status-reason: manual change
+      openshift.io/encoded-deployment-config: |
+        {"kind":"DeploymentConfig","apiVersion":"v1","metadata":{"name":"nationalparks-blue","namespace":"lpierson-parkmap-prod","selfLink":"/apis/apps.openshift.io/v1/namespaces/lpierson-parkmap-prod/deploymentconfigs/nationalparks-blue","uid":"1aa7c35f-2f5e-11e8-8c2f-0237abc1361e","resourceVersion":"22679390","generation":8,"creationTimestamp":"2018-03-24T12:23:05Z","labels":{"app":"nationalparks-blue"},"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"}},"spec":{"strategy":{"type":"Rolling","rollingParams":{"updatePeriodSeconds":1,"intervalSeconds":1,"timeoutSeconds":600,"maxUnavailable":"25%","maxSurge":"25%"},"resources":{},"activeDeadlineSeconds":21600},"triggers":[],"replicas":1,"revisionHistoryLimit":10,"test":false,"selector":{"app":"nationalparks-blue","deploymentconfig":"nationalparks-blue"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"nationalparks-blue","deploymentconfig":"nationalparks-blue"},"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"}},"spec":{"volumes":[{"name":"jboss-config","configMap":{"name":"nationalparks-blue-config","defaultMode":420}},{"name":"jboss-config1","configMap":{"name":"nationalparks-blue-config","defaultMode":420}}],"containers":[{"name":"nationalparks-blue","image":"docker-registry.default.svc:5000/lpierson-parkmap-dev/nationalparks:1.4.0.RELEASE","env":[{"name":"DB_HOST","value":"mongodb"},{"name":"DB_PORT","value":"27017"},{"name":"DB_USERNAME","value":"mongodb"},{"name":"DB_PASSWORD","value":"mongodb"},{"name":"DB_NAME","value":"parks"},{"name":"DB_REPLICASET","value":"rs0"}],"resources":{},"volumeMounts":[{"name":"jboss-config","mountPath":"/opt/eap/standalone/configuration/application-users.properties","subPath":"application-users.properties"},{"name":"jboss-config1","mountPath":"/opt/eap/standalone/configuration/application-roles.properties","subPath":"application-roles.properties"}],"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File","imagePullPolicy":"IfNotPresent"}],"restartPolicy":"Always","terminationGracePeriodSeconds":30,"dnsPolicy":"ClusterFirst","securityContext":{},"schedulerName":"default-scheduler"}}},"status":{"latestVersion":2,"observedGeneration":7,"replicas":1,"updatedReplicas":1,"availableReplicas":1,"unavailableReplicas":0,"details":{"message":"manual change","causes":[{"type":"Manual"}]},"conditions":[{"type":"Available","status":"True","lastUpdateTime":"2018-03-26T08:25:33Z","lastTransitionTime":"2018-03-26T08:25:33Z","message":"Deployment config has minimum availability."},{"type":"Progressing","status":"True","lastUpdateTime":"2018-03-26T08:25:34Z","lastTransitionTime":"2018-03-26T08:25:27Z","reason":"NewReplicationControllerAvailable","message":"replication controller \"nationalparks-blue-1\" successfully rolled out"}],"readyReplicas":1}}
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: nationalparks-blue
+      openshift.io/deployment-config.name: nationalparks-blue
+    name: nationalparks-blue-2
+    ownerReferences:
+    - apiVersion: apps.openshift.io/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: DeploymentConfig
+      name: nationalparks-blue
+      uid: 1aa7c35f-2f5e-11e8-8c2f-0237abc1361e
+  spec:
+    replicas: 0
+    selector:
+      app: nationalparks-blue
+      deployment: nationalparks-blue-2
+      deploymentconfig: nationalparks-blue
+    template:
+      metadata:
+        annotations:
+          openshift.io/deployment-config.latest-version: "2"
+          openshift.io/deployment-config.name: nationalparks-blue
+          openshift.io/deployment.name: nationalparks-blue-2
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: nationalparks-blue
+          deployment: nationalparks-blue-2
+          deploymentconfig: nationalparks-blue
+      spec:
+        containers:
+        - env:
+          - name: DB_HOST
+            value: mongodb
+          - name: DB_PORT
+            value: "27017"
+          - name: DB_USERNAME
+            value: mongodb
+          - name: DB_PASSWORD
+            value: mongodb
+          - name: DB_NAME
+            value: parks
+          - name: DB_REPLICASET
+            value: rs0
+          image: docker-registry.default.svc:5000/lpierson-parkmap-dev/nationalparks:1.4.0.RELEASE
+          imagePullPolicy: IfNotPresent
+          name: nationalparks-blue
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /opt/eap/standalone/configuration/application-users.properties
+            name: jboss-config
+            subPath: application-users.properties
+          - mountPath: /opt/eap/standalone/configuration/application-roles.properties
+            name: jboss-config1
+            subPath: application-roles.properties
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - configMap:
+            defaultMode: 420
+            name: nationalparks-blue-config
+          name: jboss-config
+        - configMap:
+            defaultMode: 420
+            name: nationalparks-blue-config
+          name: jboss-config1
+  status:
+    replicas: 0
+- apiVersion: v1
+  kind: ReplicationController
+  metadata:
+    annotations:
+      openshift.io/deployer-pod.completed-at: 2018-03-26 14:06:02 +0000 UTC
+      openshift.io/deployer-pod.created-at: 2018-03-26 14:05:49 +0000 UTC
+      openshift.io/deployer-pod.name: nationalparks-blue-3-deploy
+      openshift.io/deployment-config.latest-version: "3"
+      openshift.io/deployment-config.name: nationalparks-blue
+      openshift.io/deployment.phase: Complete
+      openshift.io/deployment.replicas: ""
+      openshift.io/deployment.status-reason: manual change
+      openshift.io/encoded-deployment-config: |
+        {"kind":"DeploymentConfig","apiVersion":"v1","metadata":{"name":"nationalparks-blue","namespace":"lpierson-parkmap-prod","selfLink":"/apis/apps.openshift.io/v1/namespaces/lpierson-parkmap-prod/deploymentconfigs/nationalparks-blue","uid":"1aa7c35f-2f5e-11e8-8c2f-0237abc1361e","resourceVersion":"22843023","generation":10,"creationTimestamp":"2018-03-24T12:23:05Z","labels":{"app":"nationalparks-blue"},"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"}},"spec":{"strategy":{"type":"Rolling","rollingParams":{"updatePeriodSeconds":1,"intervalSeconds":1,"timeoutSeconds":600,"maxUnavailable":"25%","maxSurge":"25%"},"resources":{},"activeDeadlineSeconds":21600},"triggers":[],"replicas":1,"revisionHistoryLimit":10,"test":false,"selector":{"app":"nationalparks-blue","deploymentconfig":"nationalparks-blue"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"nationalparks-blue","deploymentconfig":"nationalparks-blue"},"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"}},"spec":{"volumes":[{"name":"jboss-config","configMap":{"name":"nationalparks-blue-config","defaultMode":420}},{"name":"jboss-config1","configMap":{"name":"nationalparks-blue-config","defaultMode":420}}],"containers":[{"name":"nationalparks-blue","image":"docker-registry.default.svc:5000/lpierson-parkmap-dev/nationalparks:1.4.0.RELEASE-13","env":[{"name":"DB_HOST","value":"mongodb"},{"name":"DB_PORT","value":"27017"},{"name":"DB_USERNAME","value":"mongodb"},{"name":"DB_PASSWORD","value":"mongodb"},{"name":"DB_NAME","value":"parks"},{"name":"DB_REPLICASET","value":"rs0"}],"resources":{},"volumeMounts":[{"name":"jboss-config","mountPath":"/opt/eap/standalone/configuration/application-users.properties","subPath":"application-users.properties"},{"name":"jboss-config1","mountPath":"/opt/eap/standalone/configuration/application-roles.properties","subPath":"application-roles.properties"}],"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File","imagePullPolicy":"IfNotPresent"}],"restartPolicy":"Always","terminationGracePeriodSeconds":30,"dnsPolicy":"ClusterFirst","securityContext":{},"schedulerName":"default-scheduler"}}},"status":{"latestVersion":3,"observedGeneration":9,"replicas":1,"updatedReplicas":1,"availableReplicas":1,"unavailableReplicas":0,"details":{"message":"manual change","causes":[{"type":"Manual"}]},"conditions":[{"type":"Available","status":"True","lastUpdateTime":"2018-03-26T08:25:33Z","lastTransitionTime":"2018-03-26T08:25:33Z","message":"Deployment config has minimum availability."},{"type":"Progressing","status":"True","lastUpdateTime":"2018-03-26T10:39:53Z","lastTransitionTime":"2018-03-26T10:39:48Z","reason":"NewReplicationControllerAvailable","message":"replication controller \"nationalparks-blue-2\" successfully rolled out"}],"readyReplicas":1}}
+      openshift.io/jenkins-build-uri: https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/nationalparks-tasks/13/
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: nationalparks-blue
+      openshift.io/deployment-config.name: nationalparks-blue
+    name: nationalparks-blue-3
+    ownerReferences:
+    - apiVersion: apps.openshift.io/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: DeploymentConfig
+      name: nationalparks-blue
+      uid: 1aa7c35f-2f5e-11e8-8c2f-0237abc1361e
+  spec:
+    replicas: 1
+    selector:
+      app: nationalparks-blue
+      deployment: nationalparks-blue-3
+      deploymentconfig: nationalparks-blue
+    template:
+      metadata:
+        annotations:
+          openshift.io/deployment-config.latest-version: "3"
+          openshift.io/deployment-config.name: nationalparks-blue
+          openshift.io/deployment.name: nationalparks-blue-3
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: nationalparks-blue
+          deployment: nationalparks-blue-3
+          deploymentconfig: nationalparks-blue
+      spec:
+        containers:
+        - env:
+          - name: DB_HOST
+            value: mongodb
+          - name: DB_PORT
+            value: "27017"
+          - name: DB_USERNAME
+            value: mongodb
+          - name: DB_PASSWORD
+            value: mongodb
+          - name: DB_NAME
+            value: parks
+          - name: DB_REPLICASET
+            value: rs0
+          image: docker-registry.default.svc:5000/lpierson-parkmap-dev/nationalparks:1.4.0.RELEASE-13
+          imagePullPolicy: IfNotPresent
+          name: nationalparks-blue
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /opt/eap/standalone/configuration/application-users.properties
+            name: jboss-config
+            subPath: application-users.properties
+          - mountPath: /opt/eap/standalone/configuration/application-roles.properties
+            name: jboss-config1
+            subPath: application-roles.properties
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - configMap:
+            defaultMode: 420
+            name: nationalparks-blue-config
+          name: jboss-config
+        - configMap:
+            defaultMode: 420
+            name: nationalparks-blue-config
+          name: jboss-config1
+  status:
+    replicas: 0
+- apiVersion: v1
+  kind: ReplicationController
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/desired-replicas: "1"
+      openshift.io/deployer-pod.completed-at: 2018-03-24 16:49:48 +0000 UTC
+      openshift.io/deployer-pod.created-at: 2018-03-24 16:39:44 +0000 UTC
+      openshift.io/deployer-pod.name: nationalparks-green-1-deploy
+      openshift.io/deployment-config.latest-version: "1"
+      openshift.io/deployment-config.name: nationalparks-green
+      openshift.io/deployment.phase: Failed
+      openshift.io/deployment.replicas: "0"
+      openshift.io/deployment.status-reason: manual change
+      openshift.io/encoded-deployment-config: |
+        {"kind":"DeploymentConfig","apiVersion":"v1","metadata":{"name":"nationalparks-green","namespace":"lpierson-parkmap-prod","selfLink":"/apis/apps.openshift.io/v1/namespaces/lpierson-parkmap-prod/deploymentconfigs/nationalparks-green","uid":"1c30e45e-2f5e-11e8-8c2f-0237abc1361e","resourceVersion":"20930446","generation":6,"creationTimestamp":"2018-03-24T12:23:08Z","labels":{"app":"nationalparks-green"},"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"}},"spec":{"strategy":{"type":"Rolling","rollingParams":{"updatePeriodSeconds":1,"intervalSeconds":1,"timeoutSeconds":600,"maxUnavailable":"25%","maxSurge":"25%"},"resources":{},"activeDeadlineSeconds":21600},"triggers":[],"replicas":1,"revisionHistoryLimit":10,"test":false,"selector":{"app":"nationalparks-green","deploymentconfig":"nationalparks-green"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"nationalparks-green","deploymentconfig":"nationalparks-green"},"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"}},"spec":{"volumes":[{"name":"jboss-config","configMap":{"name":"nationalparks-green-config","defaultMode":420}},{"name":"jboss-config1","configMap":{"name":"nationalparks-green-config","defaultMode":420}}],"containers":[{"name":"nationalparks-green","image":"docker-registry.default.svc:5000/lpierson-parkmap-dev/nationalparks:1.4.0.RELEASE","resources":{},"volumeMounts":[{"name":"jboss-config","mountPath":"/opt/eap/standalone/configuration/application-users.properties","subPath":"application-users.properties"},{"name":"jboss-config1","mountPath":"/opt/eap/standalone/configuration/application-roles.properties","subPath":"application-roles.properties"}],"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File","imagePullPolicy":"IfNotPresent"}],"restartPolicy":"Always","terminationGracePeriodSeconds":30,"dnsPolicy":"ClusterFirst","securityContext":{},"schedulerName":"default-scheduler"}}},"status":{"latestVersion":1,"observedGeneration":5,"replicas":0,"updatedReplicas":0,"availableReplicas":0,"unavailableReplicas":0,"details":{"message":"manual change","causes":[{"type":"Manual"}]},"conditions":[{"type":"Available","status":"False","lastUpdateTime":"2018-03-24T12:23:08Z","lastTransitionTime":"2018-03-24T12:23:08Z","message":"Deployment config does not have minimum availability."}]}}
+      openshift.io/jenkins-build-uri: https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/nationalparks-tasks/6/
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: nationalparks-green
+      openshift.io/deployment-config.name: nationalparks-green
+    name: nationalparks-green-1
+    ownerReferences:
+    - apiVersion: apps.openshift.io/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: DeploymentConfig
+      name: nationalparks-green
+      uid: 1c30e45e-2f5e-11e8-8c2f-0237abc1361e
+  spec:
+    replicas: 0
+    selector:
+      app: nationalparks-green
+      deployment: nationalparks-green-1
+      deploymentconfig: nationalparks-green
+    template:
+      metadata:
+        annotations:
+          openshift.io/deployment-config.latest-version: "1"
+          openshift.io/deployment-config.name: nationalparks-green
+          openshift.io/deployment.name: nationalparks-green-1
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: nationalparks-green
+          deployment: nationalparks-green-1
+          deploymentconfig: nationalparks-green
+      spec:
+        containers:
+        - image: docker-registry.default.svc:5000/lpierson-parkmap-dev/nationalparks:1.4.0.RELEASE
+          imagePullPolicy: IfNotPresent
+          name: nationalparks-green
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /opt/eap/standalone/configuration/application-users.properties
+            name: jboss-config
+            subPath: application-users.properties
+          - mountPath: /opt/eap/standalone/configuration/application-roles.properties
+            name: jboss-config1
+            subPath: application-roles.properties
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - configMap:
+            defaultMode: 420
+            name: nationalparks-green-config
+          name: jboss-config
+        - configMap:
+            defaultMode: 420
+            name: nationalparks-green-config
+          name: jboss-config1
+  status:
+    replicas: 0
+- apiVersion: v1
+  kind: ReplicationController
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/original-replicas: "1"
+      openshift.io/deployer-pod.completed-at: 2018-03-25 18:57:18 +0000 UTC
+      openshift.io/deployer-pod.created-at: 2018-03-25 18:57:08 +0000 UTC
+      openshift.io/deployer-pod.name: nationalparks-green-2-deploy
+      openshift.io/deployment-config.latest-version: "2"
+      openshift.io/deployment-config.name: nationalparks-green
+      openshift.io/deployment.phase: Complete
+      openshift.io/deployment.replicas: "1"
+      openshift.io/deployment.status-reason: manual change
+      openshift.io/encoded-deployment-config: |
+        {"kind":"DeploymentConfig","apiVersion":"v1","metadata":{"name":"nationalparks-green","namespace":"lpierson-parkmap-prod","selfLink":"/apis/apps.openshift.io/v1/namespaces/lpierson-parkmap-prod/deploymentconfigs/nationalparks-green","uid":"1c30e45e-2f5e-11e8-8c2f-0237abc1361e","resourceVersion":"21990225","generation":7,"creationTimestamp":"2018-03-24T12:23:08Z","labels":{"app":"nationalparks-green"},"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"}},"spec":{"strategy":{"type":"Rolling","rollingParams":{"updatePeriodSeconds":1,"intervalSeconds":1,"timeoutSeconds":600,"maxUnavailable":"25%","maxSurge":"25%"},"resources":{},"activeDeadlineSeconds":21600},"triggers":[],"replicas":1,"revisionHistoryLimit":10,"test":false,"selector":{"app":"nationalparks-green","deploymentconfig":"nationalparks-green"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"nationalparks-green","deploymentconfig":"nationalparks-green"},"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"}},"spec":{"volumes":[{"name":"jboss-config","configMap":{"name":"nationalparks-green-config","defaultMode":420}},{"name":"jboss-config1","configMap":{"name":"nationalparks-green-config","defaultMode":420}}],"containers":[{"name":"nationalparks-green","image":"docker-registry.default.svc:5000/lpierson-parkmap-dev/nationalparks:1.4.0.RELEASE","resources":{},"volumeMounts":[{"name":"jboss-config","mountPath":"/opt/eap/standalone/configuration/application-users.properties","subPath":"application-users.properties"},{"name":"jboss-config1","mountPath":"/opt/eap/standalone/configuration/application-roles.properties","subPath":"application-roles.properties"}],"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File","imagePullPolicy":"IfNotPresent"}],"restartPolicy":"Always","terminationGracePeriodSeconds":30,"dnsPolicy":"ClusterFirst","securityContext":{},"schedulerName":"default-scheduler"}}},"status":{"latestVersion":2,"observedGeneration":6,"replicas":0,"updatedReplicas":0,"availableReplicas":0,"unavailableReplicas":0,"details":{"message":"manual change","causes":[{"type":"Manual"}]},"conditions":[{"type":"Available","status":"False","lastUpdateTime":"2018-03-24T12:23:08Z","lastTransitionTime":"2018-03-24T12:23:08Z","message":"Deployment config does not have minimum availability."},{"type":"Progressing","status":"False","lastUpdateTime":"2018-03-24T16:49:50Z","lastTransitionTime":"2018-03-24T16:49:50Z","reason":"ProgressDeadlineExceeded","message":"replication controller \"nationalparks-green-1\" has failed progressing"}]}}
+      openshift.io/jenkins-build-uri: https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/nationalparks-tasks/8/
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: nationalparks-green
+      openshift.io/deployment-config.name: nationalparks-green
+    name: nationalparks-green-2
+    ownerReferences:
+    - apiVersion: apps.openshift.io/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: DeploymentConfig
+      name: nationalparks-green
+      uid: 1c30e45e-2f5e-11e8-8c2f-0237abc1361e
+  spec:
+    replicas: 0
+    selector:
+      app: nationalparks-green
+      deployment: nationalparks-green-2
+      deploymentconfig: nationalparks-green
+    template:
+      metadata:
+        annotations:
+          openshift.io/deployment-config.latest-version: "2"
+          openshift.io/deployment-config.name: nationalparks-green
+          openshift.io/deployment.name: nationalparks-green-2
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: nationalparks-green
+          deployment: nationalparks-green-2
+          deploymentconfig: nationalparks-green
+      spec:
+        containers:
+        - image: docker-registry.default.svc:5000/lpierson-parkmap-dev/nationalparks:1.4.0.RELEASE
+          imagePullPolicy: IfNotPresent
+          name: nationalparks-green
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /opt/eap/standalone/configuration/application-users.properties
+            name: jboss-config
+            subPath: application-users.properties
+          - mountPath: /opt/eap/standalone/configuration/application-roles.properties
+            name: jboss-config1
+            subPath: application-roles.properties
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - configMap:
+            defaultMode: 420
+            name: nationalparks-green-config
+          name: jboss-config
+        - configMap:
+            defaultMode: 420
+            name: nationalparks-green-config
+          name: jboss-config1
+  status:
+    replicas: 0
+- apiVersion: v1
+  kind: ReplicationController
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/original-replicas: "1"
+      openshift.io/deployer-pod.completed-at: 2018-03-26 10:30:17 +0000 UTC
+      openshift.io/deployer-pod.created-at: 2018-03-26 10:30:02 +0000 UTC
+      openshift.io/deployer-pod.name: nationalparks-green-3-deploy
+      openshift.io/deployment-config.latest-version: "3"
+      openshift.io/deployment-config.name: nationalparks-green
+      openshift.io/deployment.phase: Complete
+      openshift.io/deployment.replicas: ""
+      openshift.io/deployment.status-reason: manual change
+      openshift.io/encoded-deployment-config: |
+        {"kind":"DeploymentConfig","apiVersion":"v1","metadata":{"name":"nationalparks-green","namespace":"lpierson-parkmap-prod","selfLink":"/apis/apps.openshift.io/v1/namespaces/lpierson-parkmap-prod/deploymentconfigs/nationalparks-green","uid":"1c30e45e-2f5e-11e8-8c2f-0237abc1361e","resourceVersion":"22671730","generation":9,"creationTimestamp":"2018-03-24T12:23:08Z","labels":{"app":"nationalparks-green"},"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"}},"spec":{"strategy":{"type":"Rolling","rollingParams":{"updatePeriodSeconds":1,"intervalSeconds":1,"timeoutSeconds":600,"maxUnavailable":"25%","maxSurge":"25%"},"resources":{},"activeDeadlineSeconds":21600},"triggers":[],"replicas":1,"revisionHistoryLimit":10,"test":false,"selector":{"app":"nationalparks-green","deploymentconfig":"nationalparks-green"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"nationalparks-green","deploymentconfig":"nationalparks-green"},"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"}},"spec":{"volumes":[{"name":"jboss-config","configMap":{"name":"nationalparks-green-config","defaultMode":420}},{"name":"jboss-config1","configMap":{"name":"nationalparks-green-config","defaultMode":420}}],"containers":[{"name":"nationalparks-green","image":"docker-registry.default.svc:5000/lpierson-parkmap-dev/nationalparks:1.4.0.RELEASE","env":[{"name":"DB_HOST","value":"mongodb"},{"name":"DB_PORT","value":"27017"},{"name":"DB_USERNAME","value":"mongodb"},{"name":"DB_PASSWORD","value":"mongodb"},{"name":"DB_NAME","value":"parks"},{"name":"DB_REPLICASET","value":"rs0"}],"resources":{},"volumeMounts":[{"name":"jboss-config","mountPath":"/opt/eap/standalone/configuration/application-users.properties","subPath":"application-users.properties"},{"name":"jboss-config1","mountPath":"/opt/eap/standalone/configuration/application-roles.properties","subPath":"application-roles.properties"}],"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File","imagePullPolicy":"IfNotPresent"}],"restartPolicy":"Always","terminationGracePeriodSeconds":30,"dnsPolicy":"ClusterFirst","securityContext":{},"schedulerName":"default-scheduler"}}},"status":{"latestVersion":3,"observedGeneration":8,"replicas":1,"updatedReplicas":1,"availableReplicas":1,"unavailableReplicas":0,"details":{"message":"manual change","causes":[{"type":"Manual"}]},"conditions":[{"type":"Available","status":"True","lastUpdateTime":"2018-03-25T18:57:18Z","lastTransitionTime":"2018-03-25T18:57:18Z","message":"Deployment config has minimum availability."},{"type":"Progressing","status":"True","lastUpdateTime":"2018-03-25T18:57:19Z","lastTransitionTime":"2018-03-25T18:57:15Z","reason":"NewReplicationControllerAvailable","message":"replication controller \"nationalparks-green-2\" successfully rolled out"}],"readyReplicas":1}}
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: nationalparks-green
+      openshift.io/deployment-config.name: nationalparks-green
+    name: nationalparks-green-3
+    ownerReferences:
+    - apiVersion: apps.openshift.io/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: DeploymentConfig
+      name: nationalparks-green
+      uid: 1c30e45e-2f5e-11e8-8c2f-0237abc1361e
+  spec:
+    replicas: 0
+    selector:
+      app: nationalparks-green
+      deployment: nationalparks-green-3
+      deploymentconfig: nationalparks-green
+    template:
+      metadata:
+        annotations:
+          openshift.io/deployment-config.latest-version: "3"
+          openshift.io/deployment-config.name: nationalparks-green
+          openshift.io/deployment.name: nationalparks-green-3
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: nationalparks-green
+          deployment: nationalparks-green-3
+          deploymentconfig: nationalparks-green
+      spec:
+        containers:
+        - env:
+          - name: DB_HOST
+            value: mongodb
+          - name: DB_PORT
+            value: "27017"
+          - name: DB_USERNAME
+            value: mongodb
+          - name: DB_PASSWORD
+            value: mongodb
+          - name: DB_NAME
+            value: parks
+          - name: DB_REPLICASET
+            value: rs0
+          image: docker-registry.default.svc:5000/lpierson-parkmap-dev/nationalparks:1.4.0.RELEASE
+          imagePullPolicy: IfNotPresent
+          name: nationalparks-green
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /opt/eap/standalone/configuration/application-users.properties
+            name: jboss-config
+            subPath: application-users.properties
+          - mountPath: /opt/eap/standalone/configuration/application-roles.properties
+            name: jboss-config1
+            subPath: application-roles.properties
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - configMap:
+            defaultMode: 420
+            name: nationalparks-green-config
+          name: jboss-config
+        - configMap:
+            defaultMode: 420
+            name: nationalparks-green-config
+          name: jboss-config1
+  status:
+    replicas: 0
+- apiVersion: v1
+  kind: ReplicationController
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/original-replicas: "1"
+      openshift.io/deployer-pod.completed-at: 2018-03-26 10:51:17 +0000 UTC
+      openshift.io/deployer-pod.created-at: 2018-03-26 10:51:05 +0000 UTC
+      openshift.io/deployer-pod.name: nationalparks-green-4-deploy
+      openshift.io/deployment-config.latest-version: "4"
+      openshift.io/deployment-config.name: nationalparks-green
+      openshift.io/deployment.phase: Complete
+      openshift.io/deployment.replicas: ""
+      openshift.io/deployment.status-reason: manual change
+      openshift.io/encoded-deployment-config: |
+        {"kind":"DeploymentConfig","apiVersion":"v1","metadata":{"name":"nationalparks-green","namespace":"lpierson-parkmap-prod","selfLink":"/apis/apps.openshift.io/v1/namespaces/lpierson-parkmap-prod/deploymentconfigs/nationalparks-green","uid":"1c30e45e-2f5e-11e8-8c2f-0237abc1361e","resourceVersion":"22688446","generation":10,"creationTimestamp":"2018-03-24T12:23:08Z","labels":{"app":"nationalparks-green"},"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"}},"spec":{"strategy":{"type":"Rolling","rollingParams":{"updatePeriodSeconds":1,"intervalSeconds":1,"timeoutSeconds":600,"maxUnavailable":"25%","maxSurge":"25%"},"resources":{},"activeDeadlineSeconds":21600},"triggers":[],"replicas":1,"revisionHistoryLimit":10,"test":false,"selector":{"app":"nationalparks-green","deploymentconfig":"nationalparks-green"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"nationalparks-green","deploymentconfig":"nationalparks-green"},"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"}},"spec":{"volumes":[{"name":"jboss-config","configMap":{"name":"nationalparks-green-config","defaultMode":420}},{"name":"jboss-config1","configMap":{"name":"nationalparks-green-config","defaultMode":420}}],"containers":[{"name":"nationalparks-green","image":"docker-registry.default.svc:5000/lpierson-parkmap-dev/nationalparks:1.4.0.RELEASE","env":[{"name":"DB_HOST","value":"mongodb"},{"name":"DB_PORT","value":"27017"},{"name":"DB_USERNAME","value":"mongodb"},{"name":"DB_PASSWORD","value":"mongodb"},{"name":"DB_NAME","value":"parks"},{"name":"DB_REPLICASET","value":"rs0"}],"resources":{},"volumeMounts":[{"name":"jboss-config","mountPath":"/opt/eap/standalone/configuration/application-users.properties","subPath":"application-users.properties"},{"name":"jboss-config1","mountPath":"/opt/eap/standalone/configuration/application-roles.properties","subPath":"application-roles.properties"}],"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File","imagePullPolicy":"IfNotPresent"}],"restartPolicy":"Always","terminationGracePeriodSeconds":30,"dnsPolicy":"ClusterFirst","securityContext":{},"schedulerName":"default-scheduler"}}},"status":{"latestVersion":4,"observedGeneration":9,"replicas":1,"updatedReplicas":1,"availableReplicas":1,"unavailableReplicas":0,"details":{"message":"manual change","causes":[{"type":"Manual"}]},"conditions":[{"type":"Available","status":"True","lastUpdateTime":"2018-03-25T18:57:18Z","lastTransitionTime":"2018-03-25T18:57:18Z","message":"Deployment config has minimum availability."},{"type":"Progressing","status":"True","lastUpdateTime":"2018-03-26T10:30:18Z","lastTransitionTime":"2018-03-26T10:30:14Z","reason":"NewReplicationControllerAvailable","message":"replication controller \"nationalparks-green-3\" successfully rolled out"}],"readyReplicas":1}}
+      openshift.io/jenkins-build-uri: https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/nationalparks-tasks/10/
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: nationalparks-green
+      openshift.io/deployment-config.name: nationalparks-green
+    name: nationalparks-green-4
+    ownerReferences:
+    - apiVersion: apps.openshift.io/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: DeploymentConfig
+      name: nationalparks-green
+      uid: 1c30e45e-2f5e-11e8-8c2f-0237abc1361e
+  spec:
+    replicas: 0
+    selector:
+      app: nationalparks-green
+      deployment: nationalparks-green-4
+      deploymentconfig: nationalparks-green
+    template:
+      metadata:
+        annotations:
+          openshift.io/deployment-config.latest-version: "4"
+          openshift.io/deployment-config.name: nationalparks-green
+          openshift.io/deployment.name: nationalparks-green-4
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: nationalparks-green
+          deployment: nationalparks-green-4
+          deploymentconfig: nationalparks-green
+      spec:
+        containers:
+        - env:
+          - name: DB_HOST
+            value: mongodb
+          - name: DB_PORT
+            value: "27017"
+          - name: DB_USERNAME
+            value: mongodb
+          - name: DB_PASSWORD
+            value: mongodb
+          - name: DB_NAME
+            value: parks
+          - name: DB_REPLICASET
+            value: rs0
+          image: docker-registry.default.svc:5000/lpierson-parkmap-dev/nationalparks:1.4.0.RELEASE
+          imagePullPolicy: IfNotPresent
+          name: nationalparks-green
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /opt/eap/standalone/configuration/application-users.properties
+            name: jboss-config
+            subPath: application-users.properties
+          - mountPath: /opt/eap/standalone/configuration/application-roles.properties
+            name: jboss-config1
+            subPath: application-roles.properties
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - configMap:
+            defaultMode: 420
+            name: nationalparks-green-config
+          name: jboss-config
+        - configMap:
+            defaultMode: 420
+            name: nationalparks-green-config
+          name: jboss-config1
+  status:
+    replicas: 0
+- apiVersion: v1
+  kind: ReplicationController
+  metadata:
+    annotations:
+      openshift.io/deployer-pod.completed-at: 2018-03-26 18:00:39 +0000 UTC
+      openshift.io/deployer-pod.created-at: 2018-03-26 18:00:22 +0000 UTC
+      openshift.io/deployer-pod.name: nationalparks-green-5-deploy
+      openshift.io/deployment-config.latest-version: "5"
+      openshift.io/deployment-config.name: nationalparks-green
+      openshift.io/deployment.phase: Complete
+      openshift.io/deployment.replicas: ""
+      openshift.io/deployment.status-reason: manual change
+      openshift.io/encoded-deployment-config: |
+        {"kind":"DeploymentConfig","apiVersion":"v1","metadata":{"name":"nationalparks-green","namespace":"lpierson-parkmap-prod","selfLink":"/apis/apps.openshift.io/v1/namespaces/lpierson-parkmap-prod/deploymentconfigs/nationalparks-green","uid":"1c30e45e-2f5e-11e8-8c2f-0237abc1361e","resourceVersion":"23028759","generation":12,"creationTimestamp":"2018-03-24T12:23:08Z","labels":{"app":"nationalparks-green"},"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"}},"spec":{"strategy":{"type":"Rolling","rollingParams":{"updatePeriodSeconds":1,"intervalSeconds":1,"timeoutSeconds":600,"maxUnavailable":"25%","maxSurge":"25%"},"resources":{},"activeDeadlineSeconds":21600},"triggers":[],"replicas":1,"revisionHistoryLimit":10,"test":false,"selector":{"app":"nationalparks-green","deploymentconfig":"nationalparks-green"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"nationalparks-green","deploymentconfig":"nationalparks-green"},"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"}},"spec":{"volumes":[{"name":"jboss-config","configMap":{"name":"nationalparks-green-config","defaultMode":420}},{"name":"jboss-config1","configMap":{"name":"nationalparks-green-config","defaultMode":420}}],"containers":[{"name":"nationalparks-green","image":"docker-registry.default.svc:5000/lpierson-parkmap-dev/nationalparks:1.4.0.RELEASE-2","env":[{"name":"DB_HOST","value":"mongodb"},{"name":"DB_PORT","value":"27017"},{"name":"DB_USERNAME","value":"mongodb"},{"name":"DB_PASSWORD","value":"mongodb"},{"name":"DB_NAME","value":"parks"},{"name":"DB_REPLICASET","value":"rs0"}],"resources":{},"volumeMounts":[{"name":"jboss-config","mountPath":"/opt/eap/standalone/configuration/application-users.properties","subPath":"application-users.properties"},{"name":"jboss-config1","mountPath":"/opt/eap/standalone/configuration/application-roles.properties","subPath":"application-roles.properties"}],"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File","imagePullPolicy":"IfNotPresent"}],"restartPolicy":"Always","terminationGracePeriodSeconds":30,"dnsPolicy":"ClusterFirst","securityContext":{},"schedulerName":"default-scheduler"}}},"status":{"latestVersion":5,"observedGeneration":11,"replicas":1,"updatedReplicas":1,"availableReplicas":1,"unavailableReplicas":0,"details":{"message":"manual change","causes":[{"type":"Manual"}]},"conditions":[{"type":"Available","status":"True","lastUpdateTime":"2018-03-25T18:57:18Z","lastTransitionTime":"2018-03-25T18:57:18Z","message":"Deployment config has minimum availability."},{"type":"Progressing","status":"True","lastUpdateTime":"2018-03-26T10:51:18Z","lastTransitionTime":"2018-03-26T10:51:16Z","reason":"NewReplicationControllerAvailable","message":"replication controller \"nationalparks-green-4\" successfully rolled out"}],"readyReplicas":1}}
+      openshift.io/jenkins-build-uri: https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: nationalparks-green
+      openshift.io/deployment-config.name: nationalparks-green
+    name: nationalparks-green-5
+    ownerReferences:
+    - apiVersion: apps.openshift.io/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: DeploymentConfig
+      name: nationalparks-green
+      uid: 1c30e45e-2f5e-11e8-8c2f-0237abc1361e
+  spec:
+    replicas: 1
+    selector:
+      app: nationalparks-green
+      deployment: nationalparks-green-5
+      deploymentconfig: nationalparks-green
+    template:
+      metadata:
+        annotations:
+          openshift.io/deployment-config.latest-version: "5"
+          openshift.io/deployment-config.name: nationalparks-green
+          openshift.io/deployment.name: nationalparks-green-5
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: nationalparks-green
+          deployment: nationalparks-green-5
+          deploymentconfig: nationalparks-green
+      spec:
+        containers:
+        - env:
+          - name: DB_HOST
+            value: mongodb
+          - name: DB_PORT
+            value: "27017"
+          - name: DB_USERNAME
+            value: mongodb
+          - name: DB_PASSWORD
+            value: mongodb
+          - name: DB_NAME
+            value: parks
+          - name: DB_REPLICASET
+            value: rs0
+          image: docker-registry.default.svc:5000/lpierson-parkmap-dev/nationalparks:1.4.0.RELEASE-2
+          imagePullPolicy: IfNotPresent
+          name: nationalparks-green
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /opt/eap/standalone/configuration/application-users.properties
+            name: jboss-config
+            subPath: application-users.properties
+          - mountPath: /opt/eap/standalone/configuration/application-roles.properties
+            name: jboss-config1
+            subPath: application-roles.properties
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - configMap:
+            defaultMode: 420
+            name: nationalparks-green-config
+          name: jboss-config
+        - configMap:
+            defaultMode: 420
+            name: nationalparks-green-config
+          name: jboss-config1
+  status:
+    replicas: 0
+- apiVersion: v1
+  kind: ReplicationController
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/original-replicas: "1"
+      openshift.io/deployer-pod.completed-at: 2018-03-26 14:23:02 +0000 UTC
+      openshift.io/deployer-pod.created-at: 2018-03-26 14:22:51 +0000 UTC
+      openshift.io/deployer-pod.name: parksmap-blue-1-deploy
+      openshift.io/deployment-config.latest-version: "1"
+      openshift.io/deployment-config.name: parksmap-blue
+      openshift.io/deployment.phase: Complete
+      openshift.io/deployment.replicas: "1"
+      openshift.io/deployment.status-reason: manual change
+      openshift.io/encoded-deployment-config: |
+        {"kind":"DeploymentConfig","apiVersion":"v1","metadata":{"name":"parksmap-blue","namespace":"lpierson-parkmap-prod","selfLink":"/apis/apps.openshift.io/v1/namespaces/lpierson-parkmap-prod/deploymentconfigs/parksmap-blue","uid":"255522de-2f5e-11e8-8c2f-0237abc1361e","resourceVersion":"22856852","generation":4,"creationTimestamp":"2018-03-24T12:23:23Z","labels":{"app":"parksmap-blue"},"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"}},"spec":{"strategy":{"type":"Rolling","rollingParams":{"updatePeriodSeconds":1,"intervalSeconds":1,"timeoutSeconds":600,"maxUnavailable":"25%","maxSurge":"25%"},"resources":{},"activeDeadlineSeconds":21600},"triggers":[],"replicas":1,"revisionHistoryLimit":10,"test":false,"selector":{"app":"parksmap-blue","deploymentconfig":"parksmap-blue"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"parksmap-blue","deploymentconfig":"parksmap-blue"},"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"}},"spec":{"containers":[{"name":"parksmap-blue","image":"docker-registry.default.svc:5000/lpierson-parkmap-dev/parksmap:1.4.0.RELEASE-5","resources":{},"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File","imagePullPolicy":"IfNotPresent"}],"restartPolicy":"Always","terminationGracePeriodSeconds":30,"dnsPolicy":"ClusterFirst","securityContext":{},"schedulerName":"default-scheduler"}}},"status":{"latestVersion":1,"observedGeneration":3,"replicas":0,"updatedReplicas":0,"availableReplicas":0,"unavailableReplicas":0,"details":{"message":"manual change","causes":[{"type":"Manual"}]},"conditions":[{"type":"Available","status":"False","lastUpdateTime":"2018-03-24T12:23:23Z","lastTransitionTime":"2018-03-24T12:23:23Z","message":"Deployment config does not have minimum availability."}]}}
+      openshift.io/jenkins-build-uri: https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/parksmap-tasks/5/
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: parksmap-blue
+      openshift.io/deployment-config.name: parksmap-blue
+    name: parksmap-blue-1
+    ownerReferences:
+    - apiVersion: apps.openshift.io/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: DeploymentConfig
+      name: parksmap-blue
+      uid: 255522de-2f5e-11e8-8c2f-0237abc1361e
+  spec:
+    replicas: 0
+    selector:
+      app: parksmap-blue
+      deployment: parksmap-blue-1
+      deploymentconfig: parksmap-blue
+    template:
+      metadata:
+        annotations:
+          openshift.io/deployment-config.latest-version: "1"
+          openshift.io/deployment-config.name: parksmap-blue
+          openshift.io/deployment.name: parksmap-blue-1
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: parksmap-blue
+          deployment: parksmap-blue-1
+          deploymentconfig: parksmap-blue
+      spec:
+        containers:
+        - image: docker-registry.default.svc:5000/lpierson-parkmap-dev/parksmap:1.4.0.RELEASE-5
+          imagePullPolicy: IfNotPresent
+          name: parksmap-blue
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+  status:
+    replicas: 0
+- apiVersion: v1
+  kind: ReplicationController
+  metadata:
+    annotations:
+      openshift.io/deployer-pod.completed-at: 2018-03-26 14:59:45 +0000 UTC
+      openshift.io/deployer-pod.created-at: 2018-03-26 14:59:28 +0000 UTC
+      openshift.io/deployer-pod.name: parksmap-blue-2-deploy
+      openshift.io/deployment-config.latest-version: "2"
+      openshift.io/deployment-config.name: parksmap-blue
+      openshift.io/deployment.phase: Complete
+      openshift.io/deployment.replicas: ""
+      openshift.io/deployment.status-reason: manual change
+      openshift.io/encoded-deployment-config: |
+        {"kind":"DeploymentConfig","apiVersion":"v1","metadata":{"name":"parksmap-blue","namespace":"lpierson-parkmap-prod","selfLink":"/apis/apps.openshift.io/v1/namespaces/lpierson-parkmap-prod/deploymentconfigs/parksmap-blue","uid":"255522de-2f5e-11e8-8c2f-0237abc1361e","resourceVersion":"22885525","generation":5,"creationTimestamp":"2018-03-24T12:23:23Z","labels":{"app":"parksmap-blue"},"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"}},"spec":{"strategy":{"type":"Rolling","rollingParams":{"updatePeriodSeconds":1,"intervalSeconds":1,"timeoutSeconds":600,"maxUnavailable":"25%","maxSurge":"25%"},"resources":{},"activeDeadlineSeconds":21600},"triggers":[],"replicas":1,"revisionHistoryLimit":10,"test":false,"selector":{"app":"parksmap-blue","deploymentconfig":"parksmap-blue"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"parksmap-blue","deploymentconfig":"parksmap-blue"},"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"}},"spec":{"containers":[{"name":"parksmap-blue","image":"docker-registry.default.svc:5000/lpierson-parkmap-dev/parksmap:1.4.0.RELEASE-5","resources":{},"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File","imagePullPolicy":"IfNotPresent"}],"restartPolicy":"Always","terminationGracePeriodSeconds":30,"dnsPolicy":"ClusterFirst","securityContext":{},"schedulerName":"default-scheduler"}}},"status":{"latestVersion":2,"observedGeneration":4,"replicas":1,"updatedReplicas":1,"availableReplicas":1,"unavailableReplicas":0,"details":{"message":"manual change","causes":[{"type":"Manual"}]},"conditions":[{"type":"Available","status":"True","lastUpdateTime":"2018-03-26T14:23:02Z","lastTransitionTime":"2018-03-26T14:23:02Z","message":"Deployment config has minimum availability."},{"type":"Progressing","status":"True","lastUpdateTime":"2018-03-26T14:23:03Z","lastTransitionTime":"2018-03-26T14:22:57Z","reason":"NewReplicationControllerAvailable","message":"replication controller \"parksmap-blue-1\" successfully rolled out"}],"readyReplicas":1}}
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: parksmap-blue
+      openshift.io/deployment-config.name: parksmap-blue
+    name: parksmap-blue-2
+    ownerReferences:
+    - apiVersion: apps.openshift.io/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: DeploymentConfig
+      name: parksmap-blue
+      uid: 255522de-2f5e-11e8-8c2f-0237abc1361e
+  spec:
+    replicas: 1
+    selector:
+      app: parksmap-blue
+      deployment: parksmap-blue-2
+      deploymentconfig: parksmap-blue
+    template:
+      metadata:
+        annotations:
+          openshift.io/deployment-config.latest-version: "2"
+          openshift.io/deployment-config.name: parksmap-blue
+          openshift.io/deployment.name: parksmap-blue-2
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: parksmap-blue
+          deployment: parksmap-blue-2
+          deploymentconfig: parksmap-blue
+      spec:
+        containers:
+        - image: docker-registry.default.svc:5000/lpierson-parkmap-dev/parksmap:1.4.0.RELEASE-5
+          imagePullPolicy: IfNotPresent
+          name: parksmap-blue
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+  status:
+    replicas: 0
+- apiVersion: v1
+  kind: ReplicationController
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/original-replicas: "1"
+      openshift.io/deployer-pod.completed-at: 2018-03-26 09:51:38 +0000 UTC
+      openshift.io/deployer-pod.created-at: 2018-03-26 09:51:30 +0000 UTC
+      openshift.io/deployer-pod.name: parksmap-green-1-deploy
+      openshift.io/deployment-config.latest-version: "1"
+      openshift.io/deployment-config.name: parksmap-green
+      openshift.io/deployment.phase: Complete
+      openshift.io/deployment.replicas: "1"
+      openshift.io/deployment.status-reason: manual change
+      openshift.io/encoded-deployment-config: |
+        {"kind":"DeploymentConfig","apiVersion":"v1","metadata":{"name":"parksmap-green","namespace":"lpierson-parkmap-prod","selfLink":"/apis/apps.openshift.io/v1/namespaces/lpierson-parkmap-prod/deploymentconfigs/parksmap-green","uid":"26dd0233-2f5e-11e8-8c2f-0237abc1361e","resourceVersion":"22641615","generation":4,"creationTimestamp":"2018-03-24T12:23:26Z","labels":{"app":"parksmap-green"},"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"}},"spec":{"strategy":{"type":"Rolling","rollingParams":{"updatePeriodSeconds":1,"intervalSeconds":1,"timeoutSeconds":600,"maxUnavailable":"25%","maxSurge":"25%"},"resources":{},"activeDeadlineSeconds":21600},"triggers":[],"replicas":1,"revisionHistoryLimit":10,"test":false,"selector":{"app":"parksmap-green","deploymentconfig":"parksmap-green"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"parksmap-green","deploymentconfig":"parksmap-green"},"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"}},"spec":{"containers":[{"name":"parksmap-green","image":"docker-registry.default.svc:5000/lpierson-parkmap-dev/parksmap:1.4.0.RELEASE","resources":{},"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File","imagePullPolicy":"IfNotPresent"}],"restartPolicy":"Always","terminationGracePeriodSeconds":30,"dnsPolicy":"ClusterFirst","securityContext":{},"schedulerName":"default-scheduler"}}},"status":{"latestVersion":1,"observedGeneration":3,"replicas":0,"updatedReplicas":0,"availableReplicas":0,"unavailableReplicas":0,"details":{"message":"manual change","causes":[{"type":"Manual"}]},"conditions":[{"type":"Available","status":"False","lastUpdateTime":"2018-03-24T12:23:26Z","lastTransitionTime":"2018-03-24T12:23:26Z","message":"Deployment config does not have minimum availability."}]}}
+      openshift.io/jenkins-build-uri: https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/parksmap-tasks/4/
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: parksmap-green
+      openshift.io/deployment-config.name: parksmap-green
+    name: parksmap-green-1
+    ownerReferences:
+    - apiVersion: apps.openshift.io/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: DeploymentConfig
+      name: parksmap-green
+      uid: 26dd0233-2f5e-11e8-8c2f-0237abc1361e
+  spec:
+    replicas: 0
+    selector:
+      app: parksmap-green
+      deployment: parksmap-green-1
+      deploymentconfig: parksmap-green
+    template:
+      metadata:
+        annotations:
+          openshift.io/deployment-config.latest-version: "1"
+          openshift.io/deployment-config.name: parksmap-green
+          openshift.io/deployment.name: parksmap-green-1
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: parksmap-green
+          deployment: parksmap-green-1
+          deploymentconfig: parksmap-green
+      spec:
+        containers:
+        - image: docker-registry.default.svc:5000/lpierson-parkmap-dev/parksmap:1.4.0.RELEASE
+          imagePullPolicy: IfNotPresent
+          name: parksmap-green
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+  status:
+    replicas: 0
+- apiVersion: v1
+  kind: ReplicationController
+  metadata:
+    annotations:
+      openshift.io/deployer-pod.completed-at: 2018-03-26 16:53:26 +0000 UTC
+      openshift.io/deployer-pod.created-at: 2018-03-26 16:53:13 +0000 UTC
+      openshift.io/deployer-pod.name: parksmap-green-2-deploy
+      openshift.io/deployment-config.latest-version: "2"
+      openshift.io/deployment-config.name: parksmap-green
+      openshift.io/deployment.phase: Complete
+      openshift.io/deployment.replicas: ""
+      openshift.io/deployment.status-reason: manual change
+      openshift.io/encoded-deployment-config: |
+        {"kind":"DeploymentConfig","apiVersion":"v1","metadata":{"name":"parksmap-green","namespace":"lpierson-parkmap-prod","selfLink":"/apis/apps.openshift.io/v1/namespaces/lpierson-parkmap-prod/deploymentconfigs/parksmap-green","uid":"26dd0233-2f5e-11e8-8c2f-0237abc1361e","resourceVersion":"22975559","generation":6,"creationTimestamp":"2018-03-24T12:23:26Z","labels":{"app":"parksmap-green"},"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"}},"spec":{"strategy":{"type":"Rolling","rollingParams":{"updatePeriodSeconds":1,"intervalSeconds":1,"timeoutSeconds":600,"maxUnavailable":"25%","maxSurge":"25%"},"resources":{},"activeDeadlineSeconds":21600},"triggers":[],"replicas":1,"revisionHistoryLimit":10,"test":false,"selector":{"app":"parksmap-green","deploymentconfig":"parksmap-green"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"parksmap-green","deploymentconfig":"parksmap-green"},"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"}},"spec":{"containers":[{"name":"parksmap-green","image":"docker-registry.default.svc:5000/lpierson-parkmap-dev/parksmap:1.4.0.RELEASE-6","resources":{},"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File","imagePullPolicy":"IfNotPresent"}],"restartPolicy":"Always","terminationGracePeriodSeconds":30,"dnsPolicy":"ClusterFirst","securityContext":{},"schedulerName":"default-scheduler"}}},"status":{"latestVersion":2,"observedGeneration":5,"replicas":1,"updatedReplicas":1,"availableReplicas":1,"unavailableReplicas":0,"details":{"message":"manual change","causes":[{"type":"Manual"}]},"conditions":[{"type":"Available","status":"True","lastUpdateTime":"2018-03-26T09:51:38Z","lastTransitionTime":"2018-03-26T09:51:38Z","message":"Deployment config has minimum availability."},{"type":"Progressing","status":"True","lastUpdateTime":"2018-03-26T09:51:40Z","lastTransitionTime":"2018-03-26T09:51:40Z","reason":"NewReplicationControllerAvailable","message":"replication controller \"parksmap-green-1\" successfully rolled out"}],"readyReplicas":1}}
+      openshift.io/jenkins-build-uri: https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/parksmap-tasks/6/
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: parksmap-green
+      openshift.io/deployment-config.name: parksmap-green
+    name: parksmap-green-2
+    ownerReferences:
+    - apiVersion: apps.openshift.io/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: DeploymentConfig
+      name: parksmap-green
+      uid: 26dd0233-2f5e-11e8-8c2f-0237abc1361e
+  spec:
+    replicas: 1
+    selector:
+      app: parksmap-green
+      deployment: parksmap-green-2
+      deploymentconfig: parksmap-green
+    template:
+      metadata:
+        annotations:
+          openshift.io/deployment-config.latest-version: "2"
+          openshift.io/deployment-config.name: parksmap-green
+          openshift.io/deployment.name: parksmap-green-2
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: parksmap-green
+          deployment: parksmap-green-2
+          deploymentconfig: parksmap-green
+      spec:
+        containers:
+        - image: docker-registry.default.svc:5000/lpierson-parkmap-dev/parksmap:1.4.0.RELEASE-6
+          imagePullPolicy: IfNotPresent
+          name: parksmap-green
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+  status:
+    replicas: 0
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: null
+    labels:
+      app: mlbparks-blue
+      type: parksmap-backend
+    name: mlbparks-blue
+  spec:
+    ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: mlbparks-blue
+      deploymentconfig: mlbparks-blue
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: null
+    labels:
+      app: mlbparks-green
+      type: silent
+    name: mlbparks-green
+  spec:
+    ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: mlbparks-green
+      deploymentconfig: mlbparks-green
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: null
+    labels:
+      name: mongodb
+    name: mongodb
+  spec:
+    ports:
+    - name: mongodb
+      port: 27017
+      protocol: TCP
+      targetPort: 27017
+    selector:
+      name: mongodb
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+    creationTimestamp: null
+    labels:
+      name: mongodb
+    name: mongodb-internal
+  spec:
+    clusterIP: None
+    ports:
+    - name: mongodb
+      port: 27017
+      protocol: TCP
+      targetPort: 27017
+    selector:
+      name: mongodb
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: null
+    labels:
+      app: nationalparks-blue
+      type: silent
+    name: nationalparks-blue
+  spec:
+    ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: nationalparks-blue
+      deploymentconfig: nationalparks-blue
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: null
+    labels:
+      app: nationalparks-green
+      type: parksmap-backend
+    name: nationalparks-green
+  spec:
+    ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: nationalparks-green
+      deploymentconfig: nationalparks-green
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: null
+    labels:
+      app: parksmap-blue
+    name: parksmap-blue
+  spec:
+    ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: parksmap-blue
+      deploymentconfig: parksmap-blue
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: null
+    labels:
+      app: parksmap-green
+    name: parksmap-green
+  spec:
+    ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: parksmap-green
+      deploymentconfig: parksmap-green
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- Spec:
+    PodManagementPolicy: OrderedReady
+    Replicas: 3
+    RevisionHistoryLimit: 10
+    Selector:
+      matchLabels:
+        name: mongodb
+    ServiceName: mongodb-internal
+    Template:
+      Spec:
+        ActiveDeadlineSeconds: null
+        Affinity: null
+        AutomountServiceAccountToken: null
+        Containers:
+        - Args:
+          - run-mongod-replication
+          Command: null
+          Env:
+          - Name: MONGODB_DATABASE
+            Value: parks
+            ValueFrom: null
+          - Name: MONGODB_USER
+            Value: mongodb
+            ValueFrom: null
+          - Name: MONGODB_PASSWORD
+            Value: mongodb
+            ValueFrom: null
+          - Name: MONGODB_ADMIN_PASSWORD
+            Value: mongodb_admin_password
+            ValueFrom: null
+          - Name: MONGODB_REPLICA_NAME
+            Value: rs0
+            ValueFrom: null
+          - Name: MONGODB_KEYFILE_VALUE
+            Value: "12345678901234567890"
+            ValueFrom: null
+          - Name: MONGODB_SERVICE_NAME
+            Value: mongodb
+            ValueFrom: null
+          EnvFrom: null
+          Image: registry.access.redhat.com/rhscl/mongodb-32-rhel7:3.2
+          ImagePullPolicy: IfNotPresent
+          Lifecycle: null
+          LivenessProbe: null
+          Name: mongo-container
+          Ports:
+          - ContainerPort: 27017
+            HostIP: ""
+            HostPort: 0
+            Name: ""
+            Protocol: TCP
+          ReadinessProbe:
+            Exec:
+              Command:
+              - stat
+              - /tmp/initialized
+            FailureThreshold: 3
+            HTTPGet: null
+            InitialDelaySeconds: 0
+            PeriodSeconds: 10
+            SuccessThreshold: 1
+            TCPSocket: null
+            TimeoutSeconds: 1
+          Resources:
+            Limits: null
+            Requests: null
+          SecurityContext: null
+          Stdin: false
+          StdinOnce: false
+          TTY: false
+          TerminationMessagePath: /dev/termination-log
+          TerminationMessagePolicy: File
+          VolumeMounts:
+          - MountPath: /var/lib/mongodb/data
+            Name: mongo-data
+            ReadOnly: false
+            SubPath: ""
+          WorkingDir: ""
+        DNSPolicy: ClusterFirst
+        HostAliases: null
+        Hostname: ""
+        ImagePullSecrets: null
+        InitContainers: null
+        NodeName: ""
+        NodeSelector: null
+        RestartPolicy: Always
+        SchedulerName: default-scheduler
+        SecurityContext:
+          FSGroup: null
+          HostIPC: false
+          HostNetwork: false
+          HostPID: false
+          RunAsNonRoot: null
+          RunAsUser: null
+          SELinuxOptions: null
+          SupplementalGroups: null
+        ServiceAccountName: ""
+        Subdomain: ""
+        TerminationGracePeriodSeconds: 30
+        Tolerations: null
+        Volumes: null
+      creationTimestamp: null
+      labels:
+        name: mongodb
+    UpdateStrategy:
+      RollingUpdate: null
+      Type: OnDelete
+    VolumeClaimTemplates:
+    - Spec:
+        AccessModes:
+        - ReadWriteOnce
+        Resources:
+          Limits: null
+          Requests:
+            storage: 4Gi
+        Selector: null
+        StorageClassName: null
+        VolumeName: ""
+      Status:
+        AccessModes: null
+        Capacity: null
+        Phase: Pending
+      creationTimestamp: null
+      labels:
+        name: mongodb
+      name: mongo-data
+  Status:
+    CurrentReplicas: 3
+    CurrentRevision: mongodb-1972944915
+    ObservedGeneration: 1
+    ReadyReplicas: 3
+    Replicas: 3
+    UpdateRevision: mongodb-1972944915
+    UpdatedReplicas: 0
+  creationTimestamp: null
+  generation: 1
+  labels:
+    name: mongodb
+  name: mongodb

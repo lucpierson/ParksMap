@@ -1,0 +1,8 @@
+== Parks Map Multi-service Application
+
+This is an example application consisting of three micro-services.
+
+* Two backend services providing geospatial data about Nationalparks and Major League Baseball park. The backend services are exposed as routes with label "type=parksmap-backend". The data can be stored in a MongoDB database.
+* A frontend parksmap application that can display the data on a map on a web site. The parksmap application dynamically discovers services with label "type=parksmap-backend".
+
+See the individual applications for instructions / hints on how to set up this application on OpenShift.

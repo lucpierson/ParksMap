@@ -1,0 +1,11 @@
+NAME                        REVISION   DESIRED   CURRENT   TRIGGERED BY
+deploymentconfigs/jenkins   1          1         1         config,image(jenkins:latest)
+NAME             HOST/PORT                                                  PATH      SERVICES   PORT      TERMINATION     WILDCARD
+routes/jenkins   jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com             jenkins    <all>     edge/Redirect   None
+NAME                 READY     STATUS    RESTARTS   AGE
+po/jenkins-1-7mcc8   1/1       Running   0          9m
+NAME           DESIRED   CURRENT   READY     AGE
+rc/jenkins-1   1         1         1         9m
+NAME               CLUSTER-IP     EXTERNAL-IP   PORT(S)     AGE
+svc/jenkins        172.30.3.197   <none>        80/TCP      9m
+svc/jenkins-jnlp   172.30.60.56   <none>        50000/TCP   9m

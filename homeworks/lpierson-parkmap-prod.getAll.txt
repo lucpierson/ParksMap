@@ -1,0 +1,56 @@
+NAME                            DOCKER REPO                                                               TAGS                                                            UPDATED
+imagestreams/mlbparks           docker-registry.default.svc:5000/lpierson-parkmap-prod/mlbparks           1.0-42,1.0-41,1.0-40                                            18 hours ago
+imagestreams/mongodb-32-rhel7   docker-registry.default.svc:5000/lpierson-parkmap-prod/mongodb-32-rhel7   3.2                                                             2 days ago
+imagestreams/nationalparks      docker-registry.default.svc:5000/lpierson-parkmap-prod/nationalparks      1.4.0.RELEASE-2,1.4.0.RELEASE-13,1.4.0.RELEASE-12 + 1 more...   17 hours ago
+imagestreams/parksmap           docker-registry.default.svc:5000/lpierson-parkmap-prod/parksmap           1.4.0.RELEASE-6,1.4.0.RELEASE-5                                 18 hours ago
+NAME                                    REVISION   DESIRED   CURRENT   TRIGGERED BY
+deploymentconfigs/mlbparks-blue         2          1         1         
+deploymentconfigs/mlbparks-green        3          1         1         
+deploymentconfigs/nationalparks-blue    3          1         1         
+deploymentconfigs/nationalparks-green   5          1         1         
+deploymentconfigs/parksmap-blue         2          1         1         
+deploymentconfigs/parksmap-green        2          1         1         
+NAME                   HOST/PORT                                                             PATH      SERVICES              PORT      TERMINATION   WILDCARD
+routes/mlbparks        mlbparks-lpierson-parkmap-prod.apps.na37.openshift.opentlc.com                  mlbparks-blue         8080                    None
+routes/nationalparks   nationalparks-lpierson-parkmap-prod.apps.na37.openshift.opentlc.com             nationalparks-green   8080                    None
+routes/parksmap        parksmap-lpierson-parkmap-prod.apps.na37.openshift.opentlc.com                  parksmap-green        8080                    None
+NAME                              READY     STATUS    RESTARTS   AGE
+po/mlbparks-blue-2-7xvg4          1/1       Running   0          17h
+po/mlbparks-green-3-c5kqw         1/1       Running   0          18h
+po/mongodb-0                      1/1       Running   0          2d
+po/mongodb-1                      1/1       Running   0          2d
+po/mongodb-2                      1/1       Running   0          2d
+po/nationalparks-blue-3-q9fj4     1/1       Running   0          21h
+po/nationalparks-green-1-deploy   0/1       Error     0          2d
+po/nationalparks-green-5-lgt7f    1/1       Running   0          17h
+po/parksmap-blue-2-5gdsk          1/1       Running   0          18h
+po/parksmap-green-2-w6sz2         1/1       Running   0          18h
+NAME                       DESIRED   CURRENT   READY     AGE
+rc/mlbparks-blue-1         0         0         0         18h
+rc/mlbparks-blue-2         1         1         1         17h
+rc/mlbparks-green-1        0         0         0         2d
+rc/mlbparks-green-2        0         0         0         1d
+rc/mlbparks-green-3        1         1         1         18h
+rc/nationalparks-blue-1    0         0         0         1d
+rc/nationalparks-blue-2    0         0         0         1d
+rc/nationalparks-blue-3    1         1         1         21h
+rc/nationalparks-green-1   0         0         0         2d
+rc/nationalparks-green-2   0         0         0         1d
+rc/nationalparks-green-3   0         0         0         1d
+rc/nationalparks-green-4   0         0         0         1d
+rc/nationalparks-green-5   1         1         1         17h
+rc/parksmap-blue-1         0         0         0         20h
+rc/parksmap-blue-2         1         1         1         20h
+rc/parksmap-green-1        0         0         0         1d
+rc/parksmap-green-2        1         1         1         18h
+NAME                      CLUSTER-IP       EXTERNAL-IP   PORT(S)     AGE
+svc/mlbparks-blue         172.30.171.250   <none>        8080/TCP    2d
+svc/mlbparks-green        172.30.71.217    <none>        8080/TCP    2d
+svc/mongodb               172.30.121.194   <none>        27017/TCP   2d
+svc/mongodb-internal      None             <none>        27017/TCP   2d
+svc/nationalparks-blue    172.30.200.100   <none>        8080/TCP    2d
+svc/nationalparks-green   172.30.244.123   <none>        8080/TCP    2d
+svc/parksmap-blue         172.30.91.160    <none>        8080/TCP    2d
+svc/parksmap-green        172.30.196.199   <none>        8080/TCP    2d
+NAME                   DESIRED   CURRENT   AGE
+statefulsets/mongodb   3         3         2d

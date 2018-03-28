@@ -1,0 +1,17 @@
+NAME                     DOCKER REPO                                                     TAGS      UPDATED
+imagestreams/sonarqube   docker-registry.default.svc:5000/lpierson-sonarqube/sonarqube   6.7.2     12 minutes ago
+NAME                           REVISION   DESIRED   CURRENT   TRIGGERED BY
+deploymentconfigs/postgresql   1          1         1         config,image(postgresql:9.5)
+deploymentconfigs/sonarqube    2          1         1         config,image(sonarqube:6.7.2)
+NAME               HOST/PORT                                                      PATH      SERVICES    PORT       TERMINATION   WILDCARD
+routes/sonarqube   sonarqube-lpierson-sonarqube.apps.na37.openshift.opentlc.com             sonarqube   9000-tcp                 None
+NAME                    READY     STATUS    RESTARTS   AGE
+po/postgresql-1-99qfn   1/1       Running   0          12m
+po/sonarqube-2-82lxh    1/1       Running   0          1m
+NAME              DESIRED   CURRENT   READY     AGE
+rc/postgresql-1   1         1         1         12m
+rc/sonarqube-1    0         0         0         12m
+rc/sonarqube-2    1         1         1         2m
+NAME             CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE
+svc/postgresql   172.30.103.253   <none>        5432/TCP   12m
+svc/sonarqube    172.30.15.255    <none>        9000/TCP   12m

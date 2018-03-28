@@ -1,0 +1,269 @@
+#!groovy
+
+// This pipeline on the custom Maven Slave ('maven-appdev')
+// Maven Slaves have JDK and Maven already installed
+// 'maven-appdev' has skopeo installed as well.
+node('maven-appdev') {
+  // Define Maven Command. Make sure it points to the correct
+  // settings for our Nexus installation (use the service to
+  // bypass the router). The file nexus_openshift_settings.xml
+  // needs to be in the Source Code repository.
+  def mvnCmd = "mvn -s nexus_settings_openshift.xml"
+  // def mvnCmd = "mvn"
+  // Checkout Source Code
+    stage('Checkout Source') {
+         echo "LUC ===> Checkout Source "
+         git credentialsId: 'c7708a47f75058b2af1a526babab66d071aca221', url: 'https://github.com/lucpierson/ParksMap.git'
+    }
+
+  // The following variables need to be defined at the top level
+  // and not inside the scope of a stage - otherwise they would not
+  // be accessible from other stages.
+  // Extract version and other properties from the pom.xml
+  def groupId    = getGroupIdFromPom("mlbparks/pom.xml")
+  def artifactId = getArtifactIdFromPom("mlbparks/pom.xml")
+  def version    = getVersionFromPom("mlbparks/pom.xml")
+
+  // Set the tag for the development image: version + build number
+  def devTag  = "${version}-${BUILD_NUMBER}"
+  // Set the tag for the production image: version
+  def prodTag = "${version}-${BUILD_NUMBER}"
+
+  // Using Maven build the war file
+  // Do not run tests in this step
+  stage('Build war') {
+    echo "Building version ${devTag}"
+
+    dir('mlbparks') {                           
+      // dir:"mlbparks"
+      echo "Current directory is :"
+      sh "pwd"
+      sh "${mvnCmd} clean package -DskipTests"
+    }
+  }
+
+  // Using Maven run the unit tests
+  stage('Unit Tests') {
+    echo "Running Unit Tests"
+
+      dir('mlbparks') {
+      // dir:"mlbparks"
+      echo "Current directory is :"
+      sh "pwd"
+      // sh "${mvnCmd} test"
+      }
+  }
+
+  // Using Maven call SonarQube for Code Analysis
+  stage('Code Analysis') {
+    echo "Running Code Analysis    -- skipping"
+
+      dir('mlbparks') {
+      // dir:"mlbparks"
+      echo "Current directory is :"
+      sh "pwd"
+      // sh "${mvnCmd} sonar:sonar -Dsonar.host.url=http://sonarqube-lpierson-sonarqube.apps.na37.openshift.opentlc.com/ -Dsonar.projectName=${JOB_BASE_NAME}-${devTag}"
+      }
+  }
+
+  // Publish the built war file to Nexus
+  stage('Publish to Nexus') {
+    echo "======================> STAGE Publish to Nexus"
+
+      dir('mlbparks') {
+      // dir:"mlbparks"
+      echo "Current directory is :"
+      sh "pwd"
+      sh "${mvnCmd} versions:set -DnewVersion=${devTag}"
+      sh "${mvnCmd} deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://nexus3-lpierson-nexus.apps.na37.openshift.opentlc.com/repository/releases/"
+      }
+  }
+
+  // Build the OpenShift Image in OpenShift and tag it.
+  stage('Build and Tag OpenShift Image') {
+    echo "STAGE Building OpenShift container image mlbparks:${devTag}"
+
+      dir('mlbparks') {
+      // dir:"mlbparks"
+      echo "Current directory is :"
+      sh "pwd"
+      // Start Binary Build in OpenShift using the file we just published
+      // The filename is openshift-mlbparks.war in the 'target' directory of your current
+      // Jenkins workspace
+      sh "oc start-build mlbparks --follow --from-file=./target/mlbparks.war -n lpierson-parkmap-dev"
+      // Tag the image using the devTag   
+      openshiftTag alias: 'false', destStream: 'mlbparks', destTag: devTag, destinationNamespace: 'lpierson-parkmap-dev', namespace: 'lpierson-parkmap-dev', srcStream: 'mlbparks', srcTag: 'latest', verbose: 'false'
+      } 
+  }
+
+  // Deploy the built image to the Development Environment.
+  stage('Deploy to Dev') {
+    echo "Deploying container image to Development Project"
+    echo "STAGE Deploying container image to Development Project"
+
+     dir('mlbparks') {
+      // dir:"mlbparks"
+      echo "Current directory is :"
+      sh "pwd"
+
+
+     // Update the Image on the Development Deployment Config
+     sh "oc set image dc/mlbparks mlbparks=docker-registry.default.svc:5000/lpierson-parkmap-dev/mlbparks:${devTag} -n lpierson-parkmap-dev"
+
+     // Update the Config Map which contains the users for the mlbparks application
+     //sh "oc delete configmap mlbparks-config -n lpierson-parkmap-dev"
+     //sh "oc create configmap mlbparks-config --from-file=./configuration/application-users.properties --from-file=./configuration/application-roles.properties -n lpierson-parkmap-dev"
+
+     // Deploy the development application.
+
+     openshiftDeploy depCfg: 'mlbparks', namespace: 'lpierson-parkmap-dev', verbose: 'false', waitTime: '', waitUnit: 'sec'
+     openshiftVerifyDeployment depCfg: 'mlbparks', namespace: 'lpierson-parkmap-dev', replicaCount: '1', verbose: 'false', verifyReplicaCount: 'false', waitTime: '', waitUnit: 'sec'
+     openshiftVerifyService namespace: 'lpierson-parkmap-dev', svcName: 'mlbparks', verbose: 'false'
+
+    // LUC ADDED - The exposed route to the application needs a label type=parksmap-backend for the frontend to dynamically discover the service.
+     sh 'oc patch route mlbparks -n lpierson-parkmap-dev -p \'{"metadata":{"labels":{"type": "parksmap-backend"}}}\''
+
+  }
+
+  }
+
+  // Run Integration Tests in the Development Environment.
+  stage('Integration Tests') {
+    echo "Running Integration Tests"
+     echo "1.10   ===> Running Integration Tests waiting for deployment to achieve"
+    sleep 45
+
+    // Verify that app is running
+
+    sh "curl -i -u 'mlbparks:redhat1' -H 'Content-Length: 0' -X POST http://mlbparks-lpierson-parkmap-dev.apps.na37.openshift.opentlc.com/ws/healthz"
+
+
+
+    echo " get some basic information about the service."
+
+    sh "curl -i -u 'mlbparks:redhat1' -H 'Content-Length: 0' -X GET http://mlbparks-lpierson-parkmap-dev.apps.na37.openshift.opentlc.com/ws/info"
+
+
+    // Delete task with id "1"
+    echo "Deleting tasks"
+
+    sh "curl -i -u 'mlbparks:redhat1' -H 'Content-Length: 0' -X DELETE http://mlbparks-lpierson-parkmap-dev.apps.na37.openshift.opentlc.com/ws/info"
+
+  }
+
+  // Copy Image to Nexus Docker Registry
+  stage('Copy Image to Nexus Docker Registry') {
+    echo "3.11   ==> Copy image to Nexus Docker Registry"
+    //sh "skopeo copy --src-tls-verify=false --dest-tls-verify=false --src-creds openshift:\$(oc whoami -t) --dest-creds admin:admin123 docker://nexus-registry-lpierson-nexus.apps.na37.openshift.opentlc.com:5000/lpierson-parkmap-dev/mlbparks:${devTag} docker://nexus-registry-lpierson-nexus.apps.na37.openshift.opentlc.com:5000/mlbparks:${devTag}"
+    sh "skopeo copy --src-tls-verify=false --dest-tls-verify=false --src-creds openshift:\$(oc whoami -t) --dest-creds admin:admin123 docker://docker-registry.default.svc.cluster.local:5000/lpierson-parkmap-dev/mlbparks:${devTag} docker://nexus-registry-lpierson-nexus.apps.na37.openshift.opentlc.com/mlbparks:${devTag}"
+
+
+    // Tag the built image with the production tag.
+       // changing the prod tag as Applicaiton is production ready
+       prodTag = devTag
+       echo "the prod tag to use for the image in production:" + prodTag
+
+
+    openshiftTag alias: 'false', destStream: 'mlbparks', destTag: prodTag, destinationNamespace: 'lpierson-parkmap-prod', namespace: 'lpierson-parkmap-dev', srcStream: 'mlbparks', srcTag: devTag, verbose: 'false'
+
+
+
+  }
+
+  // Blue/Green Deployment into Production
+  // -------------------------------------
+  // Do not activate the new version yet.
+
+  def destApp   = "mlbparks-green"
+  def activeApp = ""
+
+  stage('Blue/Green Production Deployment') {
+    // your project names
+    echo "3.12   ==> Blue/Green Deployment into Production"
+
+    sh "oc get route mlbparks -n lpierson-parkmap-prod -o jsonpath='{ .spec.to.name }' > activesvc.txt"
+    activeApp = readFile('activesvc.txt').trim()
+    if (activeApp == "mlbparks-green") {
+       destApp = "mlbparks-blue"
+    }
+    echo "===== LUC =============> Active Application:      " + activeApp
+    echo "===== LUC =============> Destination Application: " + destApp
+
+
+     dir('mlbparks') {
+      // dir:"mlbparks"
+      echo "Current directory is :"
+      sh "pwd"
+
+
+       echo "the prod tag to use for the image in production:" + prodTag
+
+       // Update the Image on the Production Deployment Config
+       sh "oc set image dc/${destApp} ${destApp}=docker-registry.default.svc:5000/lpierson-parkmap-dev/mlbparks:${prodTag} -n lpierson-parkmap-prod"
+
+       // Update the Config Map which contains the users for the mlbparks application
+       sh "oc delete configmap ${destApp}-config -n lpierson-parkmap-prod --ignore-not-found=true"
+       sh "oc create configmap ${destApp}-config --from-file=./configuration/application-users.properties --from-file=./configuration/application-roles.properties -n lpierson-parkmap-prod"
+
+       // Deploy the inactive application.
+
+       openshiftDeploy depCfg: destApp, namespace: 'lpierson-parkmap-prod', verbose: 'false', waitTime: '', waitUnit: 'sec'
+       openshiftVerifyDeployment depCfg: destApp, namespace: 'lpierson-parkmap-prod', replicaCount: '1', verbose: 'false', verifyReplicaCount: 'true', waitTime: '', waitUnit: 'sec'
+       openshiftVerifyService namespace: 'lpierson-parkmap-prod', svcName: destApp, verbose: 'false'
+      }
+  }
+
+  stage('Switch over to new Version') {
+    
+    echo "3.13 Switching Production application to ${destApp}."
+
+   // patching the service for  parksmap-backend scan and ask to go live
+  
+
+   sh "oc get route mlbparks -n lpierson-parkmap-prod -o jsonpath='{ .spec.to.name }' > activesvc.txt"
+      activeApp = readFile('activesvc.txt').trim()
+
+    //    if (active_service.equals(app_name + "-green")) {
+    if (activeApp == "mlbparks-green") {
+       destApp = "mlbparks-blue"
+    } else {
+        destApp = "mlbparks-green" 
+    }
+
+      echo "the ACTUAL in Production service      :" + activeApp
+      echo "the DESTINATION in Production service :" + destApp
+
+
+     input message: "Approve ${destApp} to GO LIVE ?"
+
+        sh 'oc patch route mlbparks -n lpierson-parkmap-prod -p \'{"spec":{"to":{"name":"' + destApp + '"}}}\''
+
+        // LUC ADDED - The exposed service of the current the application needs a label type=parksmap-backend for the frontend to dynamically discover the service.
+
+        sh "oc label --overwrite service ${destApp} type=parksmap-backend -n lpierson-parkmap-prod"
+        sh "oc label --overwrite service ${activeApp} type=silent -n lpierson-parkmap-prod"
+ 
+       //sh 'oc patch route mlbparks -n lpierson-parkmap-prod -p \'{"metadata":{"labels":{"type": "parksmap-backend"}}}\''
+  }
+
+
+
+
+}
+
+// Convenience Functions to read variables from the pom.xml
+// Do not change anything below this line.
+// --------------------------------------------------------
+def getVersionFromPom(pom) {
+  def matcher = readFile(pom) =~ '<version>(.+)</version>'
+  matcher ? matcher[0][1] : null
+}
+def getGroupIdFromPom(pom) {
+  def matcher = readFile(pom) =~ '<groupId>(.+)</groupId>'
+  matcher ? matcher[0][1] : null
+}
+def getArtifactIdFromPom(pom) {
+  def matcher = readFile(pom) =~ '<artifactId>(.+)</artifactId>'
+  matcher ? matcher[0][1] : null
+}
+

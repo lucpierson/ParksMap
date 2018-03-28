@@ -1,0 +1,683 @@
+apiVersion: v1
+kind: Template
+metadata:
+  creationTimestamp: null
+  name: jenkins
+objects:
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    creationTimestamp: null
+    name: mlbparks-pipeline
+  spec:
+    nodeSelector: {}
+    output: {}
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      git:
+        ref: master
+        uri: https://github.com/lucpierson/ParksMap
+      type: Git
+    strategy:
+      jenkinsPipelineStrategy:
+        jenkinsfilePath: mlbparks/Jenkinsfile
+      type: JenkinsPipeline
+    triggers: []
+  status:
+    lastVersion: 0
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    creationTimestamp: null
+    name: nationalparks-pipeline
+  spec:
+    nodeSelector: {}
+    output: {}
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      git:
+        ref: master
+        uri: https://github.com/lucpierson/ParksMap
+      type: Git
+    strategy:
+      jenkinsPipelineStrategy:
+        jenkinsfilePath: nationalparks/Jenkinsfile
+      type: JenkinsPipeline
+    triggers: []
+  status:
+    lastVersion: 0
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    creationTimestamp: null
+    name: parksmap-pipeline
+  spec:
+    nodeSelector: {}
+    output: {}
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      git:
+        ref: master
+        uri: https://github.com/lucpierson/ParksMap
+      type: Git
+    strategy:
+      jenkinsPipelineStrategy:
+        jenkinsfilePath: parksmap/Jenkinsfile
+      type: JenkinsPipeline
+    triggers: []
+  status:
+    lastVersion: 0
+- apiVersion: v1
+  kind: Build
+  metadata:
+    annotations:
+      openshift.io/build-config.name: nationalparks-pipeline
+      openshift.io/build.number: "2"
+      openshift.io/jenkins-blueocean-log-url: /https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/blue/organizations/jenkins/lpierson-jenkins-nationalparks-pipeline/detail/lpierson-jenkins%2Fnationalparks-pipeline/2/
+      openshift.io/jenkins-build-uri: https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/
+      openshift.io/jenkins-console-log-url: https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/console
+      openshift.io/jenkins-log-url: https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/consoleText
+      openshift.io/jenkins-status-json: '{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/wfapi/describe"},"changesets":{"href":"//job/lpierson-jenkins-nationalparks-pipeline/2/wfapi/changesets"},"pendingInputActions":null,"nextPendingInputAction":null,"artifacts":null},"id":"2","name":"#2","status":"SUCCESS","startTimeMillis":1522086900188,"endTimeMillis":1522086900188,"durationMillis":0,"queueDurationMillis":10,"pauseDurationMillis":0,"stages":[{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/6/wfapi/describe"},"log":null},"id":"6","name":"Checkout
+        Source","execNode":"","status":"SUCCESS","error":null,"parameterDescription":null,"startTimeMillis":1522086933961,"durationMillis":17686,"pauseDurationMillis":0,"stageFlowNodes":[{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/7/wfapi/describe"},"log":null},"id":"7","name":"Print
+        Message","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"LUC
+        ===> Checkout Source ","startTimeMillis":1522086934050,"durationMillis":12,"pauseDurationMillis":0,"parentNodes":["6"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/8/wfapi/describe"},"log":null},"id":"8","name":"Git","execNode":"","status":"SUCCESS","error":null,"parameterDescription":null,"startTimeMillis":1522086934062,"durationMillis":17547,"pauseDurationMillis":0,"parentNodes":["7"]}],"allChildNodeIds":["7","8"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/15/wfapi/describe"},"log":null},"id":"15","name":"Build
+        war","execNode":"","status":"SUCCESS","error":null,"parameterDescription":null,"startTimeMillis":1522086951907,"durationMillis":55738,"pauseDurationMillis":0,"stageFlowNodes":[{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/16/wfapi/describe"},"log":null},"id":"16","name":"Print
+        Message","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"Building
+        version 1.4.0.RELEASE-2","startTimeMillis":1522086952000,"durationMillis":11,"pauseDurationMillis":0,"parentNodes":["15"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/19/wfapi/describe"},"log":null},"id":"19","name":"Print
+        Message","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"Current
+        directory is :","startTimeMillis":1522086955973,"durationMillis":12,"pauseDurationMillis":0,"parentNodes":["18"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/20/wfapi/describe"},"log":null},"id":"20","name":"Shell
+        Script","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"pwd","startTimeMillis":1522086955985,"durationMillis":387,"pauseDurationMillis":0,"parentNodes":["19"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/21/wfapi/describe"},"log":null},"id":"21","name":"Shell
+        Script","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"mvn
+        -s nexus_settings_openshift.xml clean package -DskipTests","startTimeMillis":1522086956372,"durationMillis":51149,"pauseDurationMillis":0,"parentNodes":["20"]}],"allChildNodeIds":["16","17","18","19","20","21","22","23"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/27/wfapi/describe"},"log":null},"id":"27","name":"Unit
+        Tests","execNode":"","status":"SUCCESS","error":null,"parameterDescription":null,"startTimeMillis":1522087007724,"durationMillis":645,"pauseDurationMillis":0,"stageFlowNodes":[{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/28/wfapi/describe"},"log":null},"id":"28","name":"Print
+        Message","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"Running
+        Unit Tests","startTimeMillis":1522087007823,"durationMillis":11,"pauseDurationMillis":0,"parentNodes":["27"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/31/wfapi/describe"},"log":null},"id":"31","name":"Print
+        Message","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"Current
+        directory is :","startTimeMillis":1522087007958,"durationMillis":13,"pauseDurationMillis":0,"parentNodes":["30"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/32/wfapi/describe"},"log":null},"id":"32","name":"Shell
+        Script","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"pwd","startTimeMillis":1522087007971,"durationMillis":273,"pauseDurationMillis":0,"parentNodes":["31"]}],"allChildNodeIds":["28","29","30","31","32","33","34"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/38/wfapi/describe"},"log":null},"id":"38","name":"Code
+        Analysis","execNode":"","status":"SUCCESS","error":null,"parameterDescription":null,"startTimeMillis":1522087008452,"durationMillis":642,"pauseDurationMillis":0,"stageFlowNodes":[{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/39/wfapi/describe"},"log":null},"id":"39","name":"Print
+        Message","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"Running
+        Code Analysis    -- skipping","startTimeMillis":1522087008552,"durationMillis":12,"pauseDurationMillis":0,"parentNodes":["38"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/42/wfapi/describe"},"log":null},"id":"42","name":"Print
+        Message","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"Current
+        directory is :","startTimeMillis":1522087008698,"durationMillis":13,"pauseDurationMillis":0,"parentNodes":["41"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/43/wfapi/describe"},"log":null},"id":"43","name":"Shell
+        Script","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"pwd","startTimeMillis":1522087008711,"durationMillis":265,"pauseDurationMillis":0,"parentNodes":["42"]}],"allChildNodeIds":["39","40","41","42","43","44","45"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/49/wfapi/describe"},"log":null},"id":"49","name":"Publish
+        to Nexus","execNode":"","status":"SUCCESS","error":null,"parameterDescription":null,"startTimeMillis":1522087009168,"durationMillis":66349,"pauseDurationMillis":0,"stageFlowNodes":[{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/50/wfapi/describe"},"log":null},"id":"50","name":"Print
+        Message","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"======================>
+        STAGE Publish to Nexus","startTimeMillis":1522087009262,"durationMillis":11,"pauseDurationMillis":0,"parentNodes":["49"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/53/wfapi/describe"},"log":null},"id":"53","name":"Print
+        Message","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"Current
+        directory is :","startTimeMillis":1522087009397,"durationMillis":12,"pauseDurationMillis":0,"parentNodes":["52"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/54/wfapi/describe"},"log":null},"id":"54","name":"Shell
+        Script","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"pwd","startTimeMillis":1522087009409,"durationMillis":373,"pauseDurationMillis":0,"parentNodes":["53"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/55/wfapi/describe"},"log":null},"id":"55","name":"Shell
+        Script","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"mvn
+        -s nexus_settings_openshift.xml versions:set -DnewVersion=1.4.0.RELEASE-2","startTimeMillis":1522087009782,"durationMillis":29993,"pauseDurationMillis":0,"parentNodes":["54"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/56/wfapi/describe"},"log":null},"id":"56","name":"Shell
+        Script","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"mvn
+        -s nexus_settings_openshift.xml deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://nexus3-lpierson-nexus.apps.na37.openshift.opentlc.com/repository/releases/","startTimeMillis":1522087039775,"durationMillis":35624,"pauseDurationMillis":0,"parentNodes":["55"]}],"allChildNodeIds":["50","51","52","53","54","55","56","57","58"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/62/wfapi/describe"},"log":null},"id":"62","name":"Build
+        and Tag OpenShift Image","execNode":"","status":"SUCCESS","error":null,"parameterDescription":null,"startTimeMillis":1522087075593,"durationMillis":31711,"pauseDurationMillis":0,"stageFlowNodes":[{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/63/wfapi/describe"},"log":null},"id":"63","name":"Print
+        Message","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"STAGE
+        Building OpenShift container image nationalparks:1.4.0.RELEASE-2","startTimeMillis":1522087075746,"durationMillis":11,"pauseDurationMillis":0,"parentNodes":["62"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/66/wfapi/describe"},"log":null},"id":"66","name":"Print
+        Message","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"Current
+        directory is :","startTimeMillis":1522087075873,"durationMillis":13,"pauseDurationMillis":0,"parentNodes":["65"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/67/wfapi/describe"},"log":null},"id":"67","name":"Shell
+        Script","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"pwd","startTimeMillis":1522087075886,"durationMillis":302,"pauseDurationMillis":0,"parentNodes":["66"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/68/wfapi/describe"},"log":null},"id":"68","name":"Shell
+        Script","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"oc
+        start-build nationalparks --follow --from-file=./target/nationalparks.jar
+        -n lpierson-parkmap-dev","startTimeMillis":1522087076188,"durationMillis":29283,"pauseDurationMillis":0,"parentNodes":["67"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/69/wfapi/describe"},"log":null},"id":"69","name":"Tag
+        OpenShift Image","execNode":"","status":"SUCCESS","error":null,"parameterDescription":null,"startTimeMillis":1522087105471,"durationMillis":1715,"pauseDurationMillis":0,"parentNodes":["68"]}],"allChildNodeIds":["63","64","65","66","67","68","69","70","71"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/75/wfapi/describe"},"log":null},"id":"75","name":"Deploy
+        to Dev","execNode":"","status":"SUCCESS","error":null,"parameterDescription":null,"startTimeMillis":1522087107375,"durationMillis":61396,"pauseDurationMillis":0,"stageFlowNodes":[{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/76/wfapi/describe"},"log":null},"id":"76","name":"Print
+        Message","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"Deploying
+        container image to Development Project","startTimeMillis":1522087107493,"durationMillis":11,"pauseDurationMillis":0,"parentNodes":["75"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/77/wfapi/describe"},"log":null},"id":"77","name":"Print
+        Message","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"STAGE
+        Deploying container image to Development Project","startTimeMillis":1522087107504,"durationMillis":12,"pauseDurationMillis":0,"parentNodes":["76"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/80/wfapi/describe"},"log":null},"id":"80","name":"Print
+        Message","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"Current
+        directory is :","startTimeMillis":1522087107694,"durationMillis":75,"pauseDurationMillis":0,"parentNodes":["79"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/81/wfapi/describe"},"log":null},"id":"81","name":"Shell
+        Script","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"pwd","startTimeMillis":1522087107769,"durationMillis":276,"pauseDurationMillis":0,"parentNodes":["80"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/82/wfapi/describe"},"log":null},"id":"82","name":"Shell
+        Script","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"oc
+        set image dc/nationalparks nationalparks=docker-registry.default.svc:5000/lpierson-parkmap-dev/nationalparks:1.4.0.RELEASE-2
+        -n lpierson-parkmap-dev","startTimeMillis":1522087108045,"durationMillis":556,"pauseDurationMillis":0,"parentNodes":["81"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/83/wfapi/describe"},"log":null},"id":"83","name":"Trigger
+        OpenShift Deployment","execNode":"","status":"SUCCESS","error":null,"parameterDescription":null,"startTimeMillis":1522087108601,"durationMillis":59265,"pauseDurationMillis":0,"parentNodes":["82"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/84/wfapi/describe"},"log":null},"id":"84","name":"Verify
+        OpenShift Deployment","execNode":"","status":"SUCCESS","error":null,"parameterDescription":null,"startTimeMillis":1522087167866,"durationMillis":110,"pauseDurationMillis":0,"parentNodes":["83"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/85/wfapi/describe"},"log":null},"id":"85","name":"Verify
+        OpenShift Service","execNode":"","status":"SUCCESS","error":null,"parameterDescription":null,"startTimeMillis":1522087167976,"durationMillis":130,"pauseDurationMillis":0,"parentNodes":["84"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/86/wfapi/describe"},"log":null},"id":"86","name":"Shell
+        Script","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"oc
+        patch route nationalparks -n lpierson-parkmap-dev -p ''{\"metadata\":{\"labels\":{\"type\":
+        \"parksmap-backend\"}}}''","startTimeMillis":1522087168106,"durationMillis":549,"pauseDurationMillis":0,"parentNodes":["85"]}],"allChildNodeIds":["76","77","78","79","80","81","82","83","84","85","86","87","88"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/92/wfapi/describe"},"log":null},"id":"92","name":"Integration
+        Tests","execNode":"","status":"SUCCESS","error":null,"parameterDescription":null,"startTimeMillis":1522087168847,"durationMillis":46699,"pauseDurationMillis":0,"stageFlowNodes":[{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/93/wfapi/describe"},"log":null},"id":"93","name":"Print
+        Message","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"Running
+        Integration Tests","startTimeMillis":1522087168960,"durationMillis":12,"pauseDurationMillis":0,"parentNodes":["92"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/94/wfapi/describe"},"log":null},"id":"94","name":"Print
+        Message","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"1.10   ===>
+        Running Integration Tests","startTimeMillis":1522087168972,"durationMillis":10,"pauseDurationMillis":0,"parentNodes":["93"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/95/wfapi/describe"},"log":null},"id":"95","name":"Sleep","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"15","startTimeMillis":1522087168982,"durationMillis":15010,"pauseDurationMillis":0,"parentNodes":["94"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/96/wfapi/describe"},"log":null},"id":"96","name":"Sleep","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"15","startTimeMillis":1522087183992,"durationMillis":15031,"pauseDurationMillis":0,"parentNodes":["95"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/97/wfapi/describe"},"log":null},"id":"97","name":"Sleep","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"15","startTimeMillis":1522087199023,"durationMillis":15075,"pauseDurationMillis":0,"parentNodes":["96"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/98/wfapi/describe"},"log":null},"id":"98","name":"Print
+        Message","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"Creating
+        parks","startTimeMillis":1522087214098,"durationMillis":10,"pauseDurationMillis":0,"parentNodes":["97"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/99/wfapi/describe"},"log":null},"id":"99","name":"Shell
+        Script","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"curl
+        -i -X POST -u ''nationalparks:redhat1'' -H ''Content-Length: 0'' http://nationalparks-lpierson-parkmap-dev.apps.na37.openshift.opentlc.com/ws/backends/","startTimeMillis":1522087214108,"durationMillis":787,"pauseDurationMillis":0,"parentNodes":["98"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/100/wfapi/describe"},"log":null},"id":"100","name":"Print
+        Message","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"Retrieving
+        parks","startTimeMillis":1522087214895,"durationMillis":13,"pauseDurationMillis":0,"parentNodes":["99"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/101/wfapi/describe"},"log":null},"id":"101","name":"Shell
+        Script","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"curl
+        -i -X DELETE -u ''nationalparks:redhat1'' -H ''Content-Length: 0'' http://nationalparks-lpierson-parkmap-dev.apps.na37.openshift.opentlc.com/ws/backends/","startTimeMillis":1522087214908,"durationMillis":324,"pauseDurationMillis":0,"parentNodes":["100"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/102/wfapi/describe"},"log":null},"id":"102","name":"Print
+        Message","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"Deleting
+        parks","startTimeMillis":1522087215232,"durationMillis":12,"pauseDurationMillis":0,"parentNodes":["101"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/103/wfapi/describe"},"log":null},"id":"103","name":"Shell
+        Script","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"curl
+        -i -X GET-u ''nationalparks:redhat1'' -H ''Content-Length: 0'' http://nationalparks-lpierson-parkmap-dev.apps.na37.openshift.opentlc.com/ws/backends/","startTimeMillis":1522087215244,"durationMillis":264,"pauseDurationMillis":0,"parentNodes":["102"]}],"allChildNodeIds":["93","94","95","96","97","98","99","100","101","102","103"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/107/wfapi/describe"},"log":null},"id":"107","name":"Copy
+        Image to Nexus Docker Registry","execNode":"","status":"SUCCESS","error":null,"parameterDescription":null,"startTimeMillis":1522087215617,"durationMillis":3817,"pauseDurationMillis":0,"stageFlowNodes":[{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/108/wfapi/describe"},"log":null},"id":"108","name":"Print
+        Message","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"3.11   ==>
+        Copy image to Nexus Docker Registry","startTimeMillis":1522087215717,"durationMillis":10,"pauseDurationMillis":0,"parentNodes":["107"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/109/wfapi/describe"},"log":null},"id":"109","name":"Shell
+        Script","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"skopeo
+        copy --src-tls-verify=false --dest-tls-verify=false --src-creds openshift:$(oc
+        whoami -t) --dest-creds admin:admin123 docker://docker-registry.default.svc.cluster.local:5000/lpierson-parkmap-dev/nationalparks:1.4.0.RELEASE-2
+        docker://nexus-registry-lpierson-nexus.apps.na37.openshift.opentlc.com/nationalparks:1.4.0.RELEASE-2","startTimeMillis":1522087215727,"durationMillis":3564,"pauseDurationMillis":0,"parentNodes":["108"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/110/wfapi/describe"},"log":null},"id":"110","name":"Print
+        Message","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"the
+        prod tag to use for the image in production:1.4.0.RELEASE-2","startTimeMillis":1522087219291,"durationMillis":11,"pauseDurationMillis":0,"parentNodes":["109"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/111/wfapi/describe"},"log":null},"id":"111","name":"Tag
+        OpenShift Image","execNode":"","status":"SUCCESS","error":null,"parameterDescription":null,"startTimeMillis":1522087219302,"durationMillis":93,"pauseDurationMillis":0,"parentNodes":["110"]}],"allChildNodeIds":["108","109","110","111"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/115/wfapi/describe"},"log":null},"id":"115","name":"Blue/Green
+        Production Deployment","execNode":"","status":"SUCCESS","error":null,"parameterDescription":null,"startTimeMillis":1522087219506,"durationMillis":36719,"pauseDurationMillis":0,"stageFlowNodes":[{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/116/wfapi/describe"},"log":null},"id":"116","name":"Print
+        Message","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"3.12   ==>
+        Blue/Green Deployment into Production","startTimeMillis":1522087219606,"durationMillis":11,"pauseDurationMillis":0,"parentNodes":["115"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/117/wfapi/describe"},"log":null},"id":"117","name":"Shell
+        Script","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"oc
+        get route nationalparks -n lpierson-parkmap-prod -o jsonpath=''{ .spec.to.name
+        }'' > activesvc.txt","startTimeMillis":1522087219617,"durationMillis":846,"pauseDurationMillis":0,"parentNodes":["116"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/118/wfapi/describe"},"log":null},"id":"118","name":"Read
+        file from workspace","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"activesvc.txt","startTimeMillis":1522087220463,"durationMillis":122,"pauseDurationMillis":0,"parentNodes":["117"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/119/wfapi/describe"},"log":null},"id":"119","name":"Print
+        Message","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"=====
+        LUC =============> Active Application:      nationalparks-blue","startTimeMillis":1522087220585,"durationMillis":13,"pauseDurationMillis":0,"parentNodes":["118"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/120/wfapi/describe"},"log":null},"id":"120","name":"Print
+        Message","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"=====
+        LUC =============> Destination Application: nationalparks-green","startTimeMillis":1522087220598,"durationMillis":75,"pauseDurationMillis":0,"parentNodes":["119"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/123/wfapi/describe"},"log":null},"id":"123","name":"Print
+        Message","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"Current
+        directory is :","startTimeMillis":1522087220793,"durationMillis":14,"pauseDurationMillis":0,"parentNodes":["122"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/124/wfapi/describe"},"log":null},"id":"124","name":"Shell
+        Script","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"pwd","startTimeMillis":1522087220807,"durationMillis":334,"pauseDurationMillis":0,"parentNodes":["123"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/125/wfapi/describe"},"log":null},"id":"125","name":"Print
+        Message","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"the
+        prod tag to use for the image in production:1.4.0.RELEASE-2","startTimeMillis":1522087221141,"durationMillis":13,"pauseDurationMillis":0,"parentNodes":["124"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/126/wfapi/describe"},"log":null},"id":"126","name":"Shell
+        Script","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"oc
+        set image dc/nationalparks-green nationalparks-green=docker-registry.default.svc:5000/lpierson-parkmap-dev/nationalparks:1.4.0.RELEASE-2
+        -n lpierson-parkmap-prod","startTimeMillis":1522087221154,"durationMillis":847,"pauseDurationMillis":0,"parentNodes":["125"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/127/wfapi/describe"},"log":null},"id":"127","name":"Trigger
+        OpenShift Deployment","execNode":"","status":"SUCCESS","error":null,"parameterDescription":null,"startTimeMillis":1522087222001,"durationMillis":21313,"pauseDurationMillis":0,"parentNodes":["126"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/128/wfapi/describe"},"log":null},"id":"128","name":"Verify
+        OpenShift Deployment","execNode":"","status":"SUCCESS","error":null,"parameterDescription":null,"startTimeMillis":1522087243314,"durationMillis":113,"pauseDurationMillis":0,"parentNodes":["127"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/129/wfapi/describe"},"log":null},"id":"129","name":"Verify
+        OpenShift Service","execNode":"","status":"SUCCESS","error":null,"parameterDescription":null,"startTimeMillis":1522087243427,"durationMillis":12680,"pauseDurationMillis":0,"parentNodes":["128"]}],"allChildNodeIds":["116","117","118","119","120","121","122","123","124","125","126","127","128","129","130","131"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/135/wfapi/describe"},"log":null},"id":"135","name":"Switch
+        over to new Version","execNode":"","status":"SUCCESS","error":null,"parameterDescription":null,"startTimeMillis":1522087256312,"durationMillis":13280,"pauseDurationMillis":10611,"stageFlowNodes":[{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/136/wfapi/describe"},"log":null},"id":"136","name":"Print
+        Message","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"3.13
+        Switching Production application to nationalparks-green.","startTimeMillis":1522087256416,"durationMillis":11,"pauseDurationMillis":0,"parentNodes":["135"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/137/wfapi/describe"},"log":null},"id":"137","name":"Shell
+        Script","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"oc
+        get route nationalparks -n lpierson-parkmap-prod -o jsonpath=''{ .spec.to.name
+        }'' > activesvc.txt","startTimeMillis":1522087256427,"durationMillis":548,"pauseDurationMillis":0,"parentNodes":["136"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/138/wfapi/describe"},"log":null},"id":"138","name":"Read
+        file from workspace","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"activesvc.txt","startTimeMillis":1522087256975,"durationMillis":140,"pauseDurationMillis":0,"parentNodes":["137"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/139/wfapi/describe"},"log":null},"id":"139","name":"Print
+        Message","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"the
+        ACTUAL in Production service      :nationalparks-blue","startTimeMillis":1522087257115,"durationMillis":13,"pauseDurationMillis":0,"parentNodes":["138"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/140/wfapi/describe"},"log":null},"id":"140","name":"Print
+        Message","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"the
+        DESTINATION in Production service :nationalparks-green","startTimeMillis":1522087257128,"durationMillis":12,"pauseDurationMillis":0,"parentNodes":["139"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/141/wfapi/describe"},"log":null},"id":"141","name":"Wait
+        for interactive input","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"Approve
+        nationalparks-green to GO LIVE ?","startTimeMillis":1522087257140,"durationMillis":10637,"pauseDurationMillis":10611,"parentNodes":["140"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/142/wfapi/describe"},"log":null},"id":"142","name":"Shell
+        Script","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"oc
+        patch route nationalparks -n lpierson-parkmap-prod -p ''{\"spec\":{\"to\":{\"name\":\"nationalparks-green\"}}}''","startTimeMillis":1522087267777,"durationMillis":619,"pauseDurationMillis":0,"parentNodes":["141"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/143/wfapi/describe"},"log":null},"id":"143","name":"Shell
+        Script","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"oc
+        label --overwrite service nationalparks-green type=parksmap-backend -n lpierson-parkmap-prod","startTimeMillis":1522087268396,"durationMillis":600,"pauseDurationMillis":0,"parentNodes":["142"]},{"_links":{"self":{"href":"https://jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com/job/lpierson-jenkins-nationalparks-pipeline/2/execution/node/144/wfapi/describe"},"log":null},"id":"144","name":"Shell
+        Script","execNode":"","status":"SUCCESS","error":null,"parameterDescription":"oc
+        label --overwrite service nationalparks-blue type=silent -n lpierson-parkmap-prod","startTimeMillis":1522087268996,"durationMillis":558,"pauseDurationMillis":0,"parentNodes":["143"]}],"allChildNodeIds":["136","137","138","139","140","141","142","143","144"]}]}'
+    creationTimestamp: null
+    labels:
+      buildconfig: nationalparks-pipeline
+      openshift.io/build-config.name: nationalparks-pipeline
+      openshift.io/build.start-policy: Serial
+    name: nationalparks-pipeline-2
+    ownerReferences:
+    - apiVersion: build.openshift.io/v1
+      controller: true
+      kind: BuildConfig
+      name: nationalparks-pipeline
+      uid: 54227a84-311b-11e8-8c2f-0237abc1361e
+  spec:
+    nodeSelector: {}
+    output: {}
+    postCommit: {}
+    resources: {}
+    serviceAccount: builder
+    source:
+      git:
+        ref: master
+        uri: https://github.com/lucpierson/ParksMap
+      type: Git
+    strategy:
+      jenkinsPipelineStrategy:
+        jenkinsfilePath: nationalparks/Jenkinsfile
+      type: JenkinsPipeline
+    triggeredBy:
+    - message: Manually triggered
+  status:
+    config:
+      name: nationalparks-pipeline
+    output: {}
+    phase: New
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    creationTimestamp: null
+    generation: 1
+    name: jenkins-slave-maven-appdev
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+    - annotations: null
+      from:
+        kind: DockerImage
+        name: docker-registry.default.svc:5000/lpierson-jenkins/jenkins-slave-maven-appdev:v3.7
+      generation: null
+      importPolicy: {}
+      name: v3.7
+      referencePolicy:
+        type: ""
+  status:
+    dockerImageRepository: ""
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+      template.alpha.openshift.io/wait-for-ready: "true"
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: jenkins-persistent
+      template: jenkins-persistent-template
+    name: jenkins
+  spec:
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      name: jenkins
+    strategy:
+      activeDeadlineSeconds: 21600
+      recreateParams:
+        timeoutSeconds: 600
+      resources: {}
+      type: Recreate
+    template:
+      metadata:
+        annotations:
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: jenkins-persistent
+          name: jenkins
+      spec:
+        containers:
+        - env:
+          - name: OPENSHIFT_ENABLE_OAUTH
+            value: "true"
+          - name: OPENSHIFT_ENABLE_REDIRECT_PROMPT
+            value: "true"
+          - name: KUBERNETES_MASTER
+            value: https://kubernetes.default:443
+          - name: KUBERNETES_TRUST_CERTIFICATES
+            value: "true"
+          - name: JENKINS_SERVICE_NAME
+            value: jenkins
+          - name: JNLP_SERVICE_NAME
+            value: jenkins-jnlp
+          image: registry.access.redhat.com/openshift3/jenkins-2-rhel7@sha256:fc9c7f4b766fe8203a9d792e4a7f99c8962b31da158591f62d3d26ea3904c641
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 30
+            httpGet:
+              path: /login
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 420
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 3
+          name: jenkins
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /login
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 3
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 3
+          resources:
+            limits:
+              memory: 2Gi
+          securityContext:
+            capabilities: {}
+            privileged: false
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /var/lib/jenkins
+            name: jenkins-data
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        serviceAccount: jenkins
+        serviceAccountName: jenkins
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - name: jenkins-data
+          persistentVolumeClaim:
+            claimName: jenkins
+    test: false
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - jenkins
+        from:
+          kind: ImageStreamTag
+          name: jenkins:latest
+          namespace: openshift
+      type: ImageChange
+    - type: ConfigChange
+  status:
+    availableReplicas: 0
+    latestVersion: 0
+    observedGeneration: 0
+    replicas: 0
+    unavailableReplicas: 0
+    updatedReplicas: 0
+- apiVersion: v1
+  kind: Route
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+      openshift.io/host.generated: "true"
+      template.openshift.io/expose-uri: http://{.spec.host}{.spec.path}
+    creationTimestamp: null
+    labels:
+      app: jenkins-persistent
+      template: jenkins-persistent-template
+    name: jenkins
+  spec:
+    host: jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com
+    tls:
+      insecureEdgeTerminationPolicy: Redirect
+      termination: edge
+    to:
+      kind: Service
+      name: jenkins
+      weight: 100
+    wildcardPolicy: None
+  status:
+    ingress:
+    - conditions:
+      - lastTransitionTime: 2018-03-19T08:53:03Z
+        status: "True"
+        type: Admitted
+      host: jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com
+      routerName: router
+      wildcardPolicy: None
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    annotations:
+      kubernetes.io/created-by: |
+        {"kind":"SerializedReference","apiVersion":"v1","reference":{"kind":"ReplicationController","namespace":"lpierson-jenkins","name":"jenkins-1","uid":"f0468385-2b52-11e8-8c2f-0237abc1361e","apiVersion":"v1","resourceVersion":"16531098"}}
+      kubernetes.io/limit-ranger: 'LimitRanger plugin set: cpu request for container
+        jenkins; cpu limit for container jenkins'
+      openshift.io/deployment-config.latest-version: "1"
+      openshift.io/deployment-config.name: jenkins
+      openshift.io/deployment.name: jenkins-1
+      openshift.io/generated-by: OpenShiftNewApp
+      openshift.io/scc: restricted
+    creationTimestamp: null
+    generateName: jenkins-1-
+    labels:
+      app: jenkins-persistent
+      deployment: jenkins-1
+      deploymentconfig: jenkins
+      name: jenkins
+    ownerReferences:
+    - apiVersion: v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ReplicationController
+      name: jenkins-1
+      uid: f0468385-2b52-11e8-8c2f-0237abc1361e
+  spec:
+    containers:
+    - env:
+      - name: OPENSHIFT_ENABLE_OAUTH
+        value: "true"
+      - name: OPENSHIFT_ENABLE_REDIRECT_PROMPT
+        value: "true"
+      - name: KUBERNETES_MASTER
+        value: https://kubernetes.default:443
+      - name: KUBERNETES_TRUST_CERTIFICATES
+        value: "true"
+      - name: JENKINS_SERVICE_NAME
+        value: jenkins
+      - name: JNLP_SERVICE_NAME
+        value: jenkins-jnlp
+      image: registry.access.redhat.com/openshift3/jenkins-2-rhel7@sha256:fc9c7f4b766fe8203a9d792e4a7f99c8962b31da158591f62d3d26ea3904c641
+      imagePullPolicy: IfNotPresent
+      livenessProbe:
+        failureThreshold: 30
+        httpGet:
+          path: /login
+          port: 8080
+          scheme: HTTP
+        initialDelaySeconds: 420
+        periodSeconds: 10
+        successThreshold: 1
+        timeoutSeconds: 3
+      name: jenkins
+      readinessProbe:
+        failureThreshold: 3
+        httpGet:
+          path: /login
+          port: 8080
+          scheme: HTTP
+        initialDelaySeconds: 3
+        periodSeconds: 10
+        successThreshold: 1
+        timeoutSeconds: 3
+      resources:
+        limits:
+          cpu: 500m
+          memory: 2Gi
+        requests:
+          cpu: 50m
+          memory: 2Gi
+      securityContext:
+        capabilities:
+          drop:
+          - KILL
+          - MKNOD
+          - SETGID
+          - SETUID
+        privileged: false
+        runAsUser: 1002410000
+        seLinuxOptions:
+          level: s0:c49,c29
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /var/lib/jenkins
+        name: jenkins-data
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: jenkins-token-8bm4j
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    imagePullSecrets:
+    - name: jenkins-dockercfg-mvwl8
+    nodeName: node1.na37.internal
+    nodeSelector:
+      env: users
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    securityContext:
+      fsGroup: 1002410000
+      seLinuxOptions:
+        level: s0:c49,c29
+    serviceAccount: jenkins
+    serviceAccountName: jenkins
+    terminationGracePeriodSeconds: 30
+    volumes:
+    - name: jenkins-data
+      persistentVolumeClaim:
+        claimName: jenkins
+    - name: jenkins-token-8bm4j
+      secret:
+        defaultMode: 420
+        secretName: jenkins-token-8bm4j
+  status:
+    phase: Pending
+    qosClass: Burstable
+- apiVersion: v1
+  kind: ReplicationController
+  metadata:
+    annotations:
+      openshift.io/deployer-pod.completed-at: 2018-03-19 08:55:39 +0000 UTC
+      openshift.io/deployer-pod.created-at: 2018-03-19 08:53:05 +0000 UTC
+      openshift.io/deployer-pod.name: jenkins-1-deploy
+      openshift.io/deployment-config.latest-version: "1"
+      openshift.io/deployment-config.name: jenkins
+      openshift.io/deployment.phase: Complete
+      openshift.io/deployment.replicas: "1"
+      openshift.io/deployment.status-reason: config change
+      openshift.io/encoded-deployment-config: |
+        {"kind":"DeploymentConfig","apiVersion":"v1","metadata":{"name":"jenkins","namespace":"lpierson-jenkins","selfLink":"/apis/apps.openshift.io/v1/namespaces/lpierson-jenkins/deploymentconfigs/jenkins","uid":"efab257e-2b52-11e8-8c2f-0237abc1361e","resourceVersion":"16203603","generation":2,"creationTimestamp":"2018-03-19T08:53:04Z","labels":{"app":"jenkins-persistent","template":"jenkins-persistent-template"},"annotations":{"openshift.io/generated-by":"OpenShiftNewApp","template.alpha.openshift.io/wait-for-ready":"true"}},"spec":{"strategy":{"type":"Recreate","recreateParams":{"timeoutSeconds":600},"resources":{},"activeDeadlineSeconds":21600},"triggers":[{"type":"ImageChange","imageChangeParams":{"automatic":true,"containerNames":["jenkins"],"from":{"kind":"ImageStreamTag","namespace":"openshift","name":"jenkins:latest"},"lastTriggeredImage":"registry.access.redhat.com/openshift3/jenkins-2-rhel7@sha256:fc9c7f4b766fe8203a9d792e4a7f99c8962b31da158591f62d3d26ea3904c641"}},{"type":"ConfigChange"}],"replicas":1,"revisionHistoryLimit":10,"test":false,"selector":{"name":"jenkins"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"jenkins-persistent","name":"jenkins"},"annotations":{"openshift.io/generated-by":"OpenShiftNewApp"}},"spec":{"volumes":[{"name":"jenkins-data","persistentVolumeClaim":{"claimName":"jenkins"}}],"containers":[{"name":"jenkins","image":"registry.access.redhat.com/openshift3/jenkins-2-rhel7@sha256:fc9c7f4b766fe8203a9d792e4a7f99c8962b31da158591f62d3d26ea3904c641","env":[{"name":"OPENSHIFT_ENABLE_OAUTH","value":"true"},{"name":"OPENSHIFT_ENABLE_REDIRECT_PROMPT","value":"true"},{"name":"KUBERNETES_MASTER","value":"https://kubernetes.default:443"},{"name":"KUBERNETES_TRUST_CERTIFICATES","value":"true"},{"name":"JENKINS_SERVICE_NAME","value":"jenkins"},{"name":"JNLP_SERVICE_NAME","value":"jenkins-jnlp"}],"resources":{"limits":{"memory":"2Gi"}},"volumeMounts":[{"name":"jenkins-data","mountPath":"/var/lib/jenkins"}],"livenessProbe":{"httpGet":{"path":"/login","port":8080,"scheme":"HTTP"},"initialDelaySeconds":420,"timeoutSeconds":3,"periodSeconds":10,"successThreshold":1,"failureThreshold":30},"readinessProbe":{"httpGet":{"path":"/login","port":8080,"scheme":"HTTP"},"initialDelaySeconds":3,"timeoutSeconds":3,"periodSeconds":10,"successThreshold":1,"failureThreshold":3},"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File","imagePullPolicy":"IfNotPresent","securityContext":{"capabilities":{},"privileged":false}}],"restartPolicy":"Always","terminationGracePeriodSeconds":30,"dnsPolicy":"ClusterFirst","serviceAccountName":"jenkins","serviceAccount":"jenkins","securityContext":{},"schedulerName":"default-scheduler"}}},"status":{"latestVersion":1,"observedGeneration":2,"replicas":0,"updatedReplicas":0,"availableReplicas":0,"unavailableReplicas":0,"details":{"message":"config change","causes":[{"type":"ConfigChange"}]},"conditions":[{"type":"Available","status":"False","lastUpdateTime":"2018-03-19T08:53:04Z","lastTransitionTime":"2018-03-19T08:53:04Z","message":"Deployment config does not have minimum availability."}]}}
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: jenkins-persistent
+      openshift.io/deployment-config.name: jenkins
+      template: jenkins-persistent-template
+    name: jenkins-1
+    ownerReferences:
+    - apiVersion: apps.openshift.io/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: DeploymentConfig
+      name: jenkins
+      uid: efab257e-2b52-11e8-8c2f-0237abc1361e
+  spec:
+    replicas: 1
+    selector:
+      deployment: jenkins-1
+      deploymentconfig: jenkins
+      name: jenkins
+    template:
+      metadata:
+        annotations:
+          openshift.io/deployment-config.latest-version: "1"
+          openshift.io/deployment-config.name: jenkins
+          openshift.io/deployment.name: jenkins-1
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: jenkins-persistent
+          deployment: jenkins-1
+          deploymentconfig: jenkins
+          name: jenkins
+      spec:
+        containers:
+        - env:
+          - name: OPENSHIFT_ENABLE_OAUTH
+            value: "true"
+          - name: OPENSHIFT_ENABLE_REDIRECT_PROMPT
+            value: "true"
+          - name: KUBERNETES_MASTER
+            value: https://kubernetes.default:443
+          - name: KUBERNETES_TRUST_CERTIFICATES
+            value: "true"
+          - name: JENKINS_SERVICE_NAME
+            value: jenkins
+          - name: JNLP_SERVICE_NAME
+            value: jenkins-jnlp
+          image: registry.access.redhat.com/openshift3/jenkins-2-rhel7@sha256:fc9c7f4b766fe8203a9d792e4a7f99c8962b31da158591f62d3d26ea3904c641
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 30
+            httpGet:
+              path: /login
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 420
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 3
+          name: jenkins
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /login
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 3
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 3
+          resources:
+            limits:
+              memory: 2Gi
+          securityContext:
+            capabilities: {}
+            privileged: false
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /var/lib/jenkins
+            name: jenkins-data
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        serviceAccount: jenkins
+        serviceAccountName: jenkins
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - name: jenkins-data
+          persistentVolumeClaim:
+            claimName: jenkins
+  status:
+    replicas: 0
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+      service.alpha.openshift.io/dependencies: '[{"name": "jenkins-jnlp", "namespace":
+        "", "kind": "Service"}]'
+      service.openshift.io/infrastructure: "true"
+    creationTimestamp: null
+    labels:
+      app: jenkins-persistent
+      template: jenkins-persistent-template
+    name: jenkins
+  spec:
+    ports:
+    - name: web
+      port: 80
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      name: jenkins
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: jenkins-persistent
+      template: jenkins-persistent-template
+    name: jenkins-jnlp
+  spec:
+    ports:
+    - name: agent
+      port: 50000
+      protocol: TCP
+      targetPort: 50000
+    selector:
+      name: jenkins
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}

@@ -1,0 +1,15 @@
+NAME                  DOCKER REPO                                              TAGS      UPDATED
+imagestreams/nexus3   docker-registry.default.svc:5000/lpierson-nexus/nexus3   latest    43 minutes ago
+NAME                       REVISION   DESIRED   CURRENT   TRIGGERED BY
+deploymentconfigs/nexus3   2          1         1         config,image(nexus3:latest)
+NAME                    HOST/PORT                                                       PATH      SERVICES         PORT       TERMINATION   WILDCARD
+routes/nexus-registry   nexus-registry-lpierson-nexus.apps.na37.openshift.opentlc.com             nexus-registry   5000       edge          None
+routes/nexus3           nexus3-lpierson-nexus.apps.na37.openshift.opentlc.com                     nexus3           8081-tcp                 None
+NAME                READY     STATUS    RESTARTS   AGE
+po/nexus3-2-46jpd   1/1       Running   0          32m
+NAME          DESIRED   CURRENT   READY     AGE
+rc/nexus3-1   0         0         0         43m
+rc/nexus3-2   1         1         1         32m
+NAME                 CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE
+svc/nexus-registry   172.30.119.231   <none>        5000/TCP   25m
+svc/nexus3           172.30.162.141   <none>        8081/TCP   43m

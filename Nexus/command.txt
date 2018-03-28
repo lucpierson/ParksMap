@@ -1,0 +1,2 @@
+oc create -f Nexus.template.txt 
+oc new-app nexus 

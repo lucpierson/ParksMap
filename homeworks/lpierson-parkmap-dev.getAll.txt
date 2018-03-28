@@ -1,0 +1,82 @@
+NAME                         TYPE      FROM      LATEST
+buildconfigs/mlbparks        Source    Binary    4
+buildconfigs/nationalparks   Source    Binary    10
+buildconfigs/parksmap        Source    Binary    4
+NAME                      TYPE      FROM      STATUS     STARTED        DURATION
+builds/mlbparks-1         Source    Binary    Complete   2 days ago     42s
+builds/mlbparks-2         Source    Binary    Complete   18 hours ago   19s
+builds/mlbparks-3         Source    Binary    Complete   18 hours ago   21s
+builds/mlbparks-4         Source    Binary    Complete   18 hours ago   21s
+builds/nationalparks-10   Source    Binary    Complete   17 hours ago   26s
+builds/nationalparks-6    Source    Binary    Complete   22 hours ago   23s
+builds/nationalparks-7    Source    Binary    Complete   21 hours ago   23s
+builds/nationalparks-8    Source    Binary    Complete   21 hours ago   20s
+builds/nationalparks-9    Source    Binary    Complete   18 hours ago   24s
+builds/parksmap-1         Source    Binary    Complete   26 hours ago   24s
+builds/parksmap-2         Source    Binary    Complete   26 hours ago   24s
+builds/parksmap-3         Source    Binary    Complete   21 hours ago   22s
+builds/parksmap-4         Source    Binary    Complete   18 hours ago   24s
+NAME                            DOCKER REPO                                                              TAGS                                                 UPDATED
+imagestreams/mlbparks           docker-registry.default.svc:5000/lpierson-parkmap-dev/mlbparks           1.0-42,latest,1.0-41 + 3 more...                     18 hours ago
+imagestreams/mongodb-32-rhel7   docker-registry.default.svc:5000/lpierson-parkmap-dev/mongodb-32-rhel7   3.2                                                  2 days ago
+imagestreams/nationalparks      docker-registry.default.svc:5000/lpierson-parkmap-dev/nationalparks      1.4.0.RELEASE-2,latest,1.4.0.RELEASE-1 + 9 more...   17 hours ago
+imagestreams/parksmap           docker-registry.default.svc:5000/lpierson-parkmap-dev/parksmap           1.4.0.RELEASE-6,latest,1.4.0.RELEASE-5 + 3 more...   18 hours ago
+NAME                                 REVISION   DESIRED   CURRENT   TRIGGERED BY
+deploymentconfigs/mlbparks           7          1         1         
+deploymentconfigs/mongodb-32-rhel7   2          1         1         config,image(mongodb-32-rhel7:3.2)
+deploymentconfigs/nationalparks      12         1         1         
+deploymentconfigs/parksmap           4          1         1         
+NAME                      HOST/PORT                                                               PATH      SERVICES           PORT        TERMINATION   WILDCARD
+routes/mlbparks           mlbparks-lpierson-parkmap-dev.apps.na37.openshift.opentlc.com                     mlbparks           8080                      None
+routes/mongodb-32-rhel7   mongodb-32-rhel7-lpierson-parkmap-dev.apps.na37.openshift.opentlc.com             mongodb-32-rhel7   27017-tcp                 None
+routes/nationalparks      nationalparks-lpierson-parkmap-dev.apps.na37.openshift.opentlc.com                nationalparks      8080                      None
+routes/parksmap           parksmap-lpierson-parkmap-dev.apps.na37.openshift.opentlc.com                     parksmap           8080                      None
+NAME                          READY     STATUS      RESTARTS   AGE
+po/mlbparks-1-build           0/1       Completed   0          2d
+po/mlbparks-2-build           0/1       Completed   0          18h
+po/mlbparks-3-build           0/1       Completed   0          18h
+po/mlbparks-4-build           0/1       Completed   0          17h
+po/mlbparks-7-6xdb2           1/1       Running     0          17h
+po/mongodb-32-rhel7-2-mzfnh   1/1       Running     0          2d
+po/nationalparks-10-build     0/1       Completed   0          17h
+po/nationalparks-12-w7lst     1/1       Running     0          17h
+po/nationalparks-6-build      0/1       Completed   0          21h
+po/nationalparks-7-build      0/1       Completed   0          21h
+po/nationalparks-8-build      0/1       Completed   0          21h
+po/nationalparks-9-build      0/1       Completed   0          17h
+po/parksmap-1-build           0/1       Completed   0          1d
+po/parksmap-2-build           0/1       Completed   0          1d
+po/parksmap-3-build           0/1       Completed   0          20h
+po/parksmap-4-build           0/1       Completed   0          18h
+po/parksmap-4-qjvwz           1/1       Running     0          18h
+NAME                    DESIRED   CURRENT   READY     AGE
+rc/mlbparks-1           0         0         0         2d
+rc/mlbparks-2           0         0         0         2d
+rc/mlbparks-3           0         0         0         2d
+rc/mlbparks-4           0         0         0         2d
+rc/mlbparks-5           0         0         0         18h
+rc/mlbparks-6           0         0         0         18h
+rc/mlbparks-7           1         1         1         17h
+rc/mongodb-32-rhel7-1   0         0         0         2d
+rc/mongodb-32-rhel7-2   1         1         1         2d
+rc/nationalparks-10     0         0         0         21h
+rc/nationalparks-11     0         0         0         17h
+rc/nationalparks-12     1         1         1         17h
+rc/nationalparks-2      0         0         0         2d
+rc/nationalparks-3      0         0         0         1d
+rc/nationalparks-4      0         0         0         1d
+rc/nationalparks-5      0         0         0         1d
+rc/nationalparks-6      0         0         0         1d
+rc/nationalparks-7      0         0         0         1d
+rc/nationalparks-8      0         0         0         21h
+rc/nationalparks-9      0         0         0         21h
+rc/parksmap-1           0         0         0         1d
+rc/parksmap-2           0         0         0         1d
+rc/parksmap-3           0         0         0         20h
+rc/parksmap-4           1         1         1         18h
+NAME                   CLUSTER-IP       EXTERNAL-IP   PORT(S)     AGE
+svc/mlbparks           172.30.158.15    <none>        8080/TCP    2d
+svc/mongodb            172.30.125.24    <none>        27017/TCP   2d
+svc/mongodb-32-rhel7   172.30.31.9      <none>        27017/TCP   2d
+svc/nationalparks      172.30.154.130   <none>        8080/TCP    2d
+svc/parksmap           172.30.25.55     <none>        8080/TCP    2d

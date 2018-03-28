@@ -1,0 +1,194 @@
+apiVersion: v1
+kind: Template
+metadata:
+  creationTimestamp: null
+  name: jenkins
+objects:
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+      template.alpha.openshift.io/wait-for-ready: "true"
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: jenkins-persistent
+      template: jenkins-persistent-template
+    name: jenkins
+  spec:
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      name: jenkins
+    strategy:
+      activeDeadlineSeconds: 21600
+      recreateParams:
+        timeoutSeconds: 600
+      resources: {}
+      type: Recreate
+    template:
+      metadata:
+        annotations:
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: jenkins-persistent
+          name: jenkins
+      spec:
+        containers:
+        - env:
+          - name: OPENSHIFT_ENABLE_OAUTH
+            value: "true"
+          - name: OPENSHIFT_ENABLE_REDIRECT_PROMPT
+            value: "true"
+          - name: KUBERNETES_MASTER
+            value: https://kubernetes.default:443
+          - name: KUBERNETES_TRUST_CERTIFICATES
+            value: "true"
+          - name: JENKINS_SERVICE_NAME
+            value: jenkins
+          - name: JNLP_SERVICE_NAME
+            value: jenkins-jnlp
+          image: registry.access.redhat.com/openshift3/jenkins-2-rhel7@sha256:fc9c7f4b766fe8203a9d792e4a7f99c8962b31da158591f62d3d26ea3904c641
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 30
+            httpGet:
+              path: /login
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 420
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 3
+          name: jenkins
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /login
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 3
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 3
+          resources:
+            limits:
+              memory: 2Gi
+          securityContext:
+            capabilities: {}
+            privileged: false
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /var/lib/jenkins
+            name: jenkins-data
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        serviceAccount: jenkins
+        serviceAccountName: jenkins
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - name: jenkins-data
+          persistentVolumeClaim:
+            claimName: jenkins
+    test: false
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - jenkins
+        from:
+          kind: ImageStreamTag
+          name: jenkins:latest
+          namespace: openshift
+      type: ImageChange
+    - type: ConfigChange
+  status:
+    availableReplicas: 0
+    latestVersion: 0
+    observedGeneration: 0
+    replicas: 0
+    unavailableReplicas: 0
+    updatedReplicas: 0
+- apiVersion: v1
+  kind: Route
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+      openshift.io/host.generated: "true"
+      template.openshift.io/expose-uri: http://{.spec.host}{.spec.path}
+    creationTimestamp: null
+    labels:
+      app: jenkins-persistent
+      template: jenkins-persistent-template
+    name: jenkins
+  spec:
+    host: jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com
+    tls:
+      insecureEdgeTerminationPolicy: Redirect
+      termination: edge
+    to:
+      kind: Service
+      name: jenkins
+      weight: 100
+    wildcardPolicy: None
+  status:
+    ingress:
+    - conditions:
+      - lastTransitionTime: 2018-03-19T08:53:03Z
+        status: "True"
+        type: Admitted
+      host: jenkins-lpierson-jenkins.apps.na37.openshift.opentlc.com
+      routerName: router
+      wildcardPolicy: None
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+      service.alpha.openshift.io/dependencies: '[{"name": "jenkins-jnlp", "namespace":
+        "", "kind": "Service"}]'
+      service.openshift.io/infrastructure: "true"
+    creationTimestamp: null
+    labels:
+      app: jenkins-persistent
+      template: jenkins-persistent-template
+    name: jenkins
+  spec:
+    ports:
+    - name: web
+      port: 80
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      name: jenkins
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: jenkins-persistent
+      template: jenkins-persistent-template
+    name: jenkins-jnlp
+  spec:
+    ports:
+    - name: agent
+      port: 50000
+      protocol: TCP
+      targetPort: 50000
+    selector:
+      name: jenkins
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
